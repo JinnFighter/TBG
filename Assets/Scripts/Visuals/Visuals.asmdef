@@ -1,0 +1,16 @@
+{
+    "name": "Visuals",
+    "rootNamespace": "",
+    "references": [
+        "GUID:7ab00262b81ca5a4f8a50caf66f7bda3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
