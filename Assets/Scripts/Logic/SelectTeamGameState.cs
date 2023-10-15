@@ -9,6 +9,8 @@ namespace Logic
         public void EnterState(GameStateMachine gameStateMachine)
         {
             Debug.Log($"Enter state: {Id}");
+            gameStateMachine.CharactersContainer.SwitchCurrentTeam();
+            Debug.Log($"Current Team : {gameStateMachine.CharactersContainer.CurrentTeamId}");
             gameStateMachine.SetGameState<AwaitingInputGameState>();
         }
     }

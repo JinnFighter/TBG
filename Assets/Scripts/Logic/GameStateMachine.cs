@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Logic.Actions;
+using Logic.Characters;
 using UnityEngine;
 using UnityEngine.Events;
+using CharacterInfo = Logic.Characters.CharacterInfo;
 
 namespace Logic
 {
@@ -12,12 +14,14 @@ namespace Logic
         private readonly Dictionary<Type, IGameState> _gameStates = new();
 
         public readonly UnityEvent<ActionInfo> OnActionSubmitted = new();
-        public readonly UnityEvent<ActionInfo, ActionResultContainer> OnVisualizationStarted = new();
         public readonly UnityEvent OnVisualizationFinished = new();
+        public readonly UnityEvent<ActionInfo, ActionResultContainer> OnVisualizationStarted = new();
 
         private IGameState _currentGameState;
 
         private ActionInfo _lastActionInfo;
+
+        public CharactersContainer CharactersContainer { get; } = new();
 
         public ActionResultContainer LastActionResult { get; private set; }
         public EGameState CurrentState => _currentGameState?.Id ?? EGameState.Invalid;
@@ -29,15 +33,21 @@ namespace Logic
             _gameStates.Add(typeof(ProcessActionsState), new ProcessActionsState());
             _gameStates.Add(typeof(VisualizeActionsState), new VisualizeActionsState());
 
+            CharactersContainer.Init(new List<CharacterInfo>
+            {
+                new(0, "Player", CharactersContainer.PlayerTeamId),
+                new(1, "Enemy", CharactersContainer.EnemyTeamId)
+            });
+
             _actionProcessor.Init();
         }
 
         public void Terminate()
         {
-            _actionProcessor.Terminate();
-
-            _gameStates.Clear();
             ResetSubmittedAction();
+            _actionProcessor.Terminate();
+            CharactersContainer.Terminate();
+            _gameStates.Clear();
         }
 
         public void SetGameState<TGameState>() where TGameState : IGameState
@@ -50,7 +60,7 @@ namespace Logic
 
         public void Update()
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && CharactersContainer.CurrentTeamId == CharactersContainer.PlayerTeamId)
                 TrySubmitAction(new ActionInfo
                 {
                     ActionId = "test",
@@ -61,6 +71,7 @@ namespace Logic
         public void ResetSubmittedAction()
         {
             _lastActionInfo = null;
+            LastActionResult = null;
         }
 
         public bool TrySubmitAction(ActionInfo actionInfo)
@@ -79,11 +90,7 @@ namespace Logic
 
         public void VisualizeAction()
         {
-            if (LastActionResult != null)
-            {
-                OnVisualizationStarted.Invoke(_lastActionInfo, LastActionResult);
-                LastActionResult = null;
-            }
+            if (LastActionResult != null) OnVisualizationStarted.Invoke(_lastActionInfo, LastActionResult);
         }
     }
 }
