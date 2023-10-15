@@ -17,5 +17,10 @@ namespace Init
             _gameStateMachine.Init();
             _gameStateMachine.SetGameState<SelectTeamGameState>();
         }
+
+        private void Update()
+        {
+            _gameStateMachine.Update();
+        }
     }
 }

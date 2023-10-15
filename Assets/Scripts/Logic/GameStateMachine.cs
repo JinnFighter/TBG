@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Logic.Actions;
+using UnityEngine;
+using UnityEngine.Events;
 
 namespace Logic
 {
@@ -7,7 +10,11 @@ namespace Logic
     {
         private readonly Dictionary<Type, IGameState> _gameStates = new();
 
+        public readonly UnityEvent<ActionInfo> OnActionSubmitted = new();
+
         private IGameState _currentGameState;
+
+        private ActionInfo _lastActionInfo;
         public EGameState CurrentState => _currentGameState?.Id ?? EGameState.Invalid;
 
         public void Init()
@@ -24,6 +31,30 @@ namespace Logic
 
             _currentGameState = gameState;
             _currentGameState?.EnterState(this);
+        }
+
+        public void Update()
+        {
+            if (Input.GetMouseButtonDown(0))
+                TrySubmitAction(new ActionInfo
+                {
+                    ActionId = "test",
+                    CasterId = 0
+                });
+        }
+
+        public void ResetSubmittedAction()
+        {
+            _lastActionInfo = null;
+        }
+
+        public bool TrySubmitAction(ActionInfo actionInfo)
+        {
+            if (_lastActionInfo != null) return false;
+
+            _lastActionInfo = actionInfo;
+            OnActionSubmitted.Invoke(_lastActionInfo);
+            return true;
         }
     }
 }

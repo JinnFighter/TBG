@@ -9,6 +9,14 @@ namespace Logic
         public void EnterState(GameStateMachine gameStateMachine)
         {
             Debug.Log($"Enter state: {Id}");
+
+            gameStateMachine.ResetSubmittedAction();
+            gameStateMachine.OnActionSubmitted.AddListener(_ => HandleActionSubmitted(gameStateMachine));
+        }
+
+        private void HandleActionSubmitted(GameStateMachine stateMachine)
+        {
+            stateMachine.SetGameState<ProcessActionsState>();
         }
     }
 }
