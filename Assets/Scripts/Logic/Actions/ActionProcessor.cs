@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Logic.Actions
 {
@@ -17,22 +16,11 @@ namespace Logic.Actions
             _actionLogics.Clear();
         }
 
-        public void ProcessAction(ActionInfo actionInfo)
+        public ActionResultContainer ProcessAction(ActionInfo actionInfo)
         {
-            foreach (var actionLogic in _actionLogics) actionLogic.DoAction(actionInfo);
-        }
-    }
-
-    public interface IActionLogic
-    {
-        void DoAction(ActionInfo actionInfo);
-    }
-
-    public class TestActionLogic : IActionLogic
-    {
-        public void DoAction(ActionInfo actionInfo)
-        {
-            Debug.Log($"Action {actionInfo.ActionId} was casted by entity {actionInfo.CasterId}");
+            var resultContainer = new ActionResultContainer();
+            foreach (var actionLogic in _actionLogics) actionLogic.DoAction(actionInfo, resultContainer);
+            return resultContainer;
         }
     }
 }

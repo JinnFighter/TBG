@@ -12,10 +12,14 @@ namespace Logic
         private readonly Dictionary<Type, IGameState> _gameStates = new();
 
         public readonly UnityEvent<ActionInfo> OnActionSubmitted = new();
+        public readonly UnityEvent<ActionInfo, ActionResultContainer> OnVisualizationStarted = new();
+        public readonly UnityEvent OnVisualizationFinished = new();
 
         private IGameState _currentGameState;
 
         private ActionInfo _lastActionInfo;
+
+        public ActionResultContainer LastActionResult { get; private set; }
         public EGameState CurrentState => _currentGameState?.Id ?? EGameState.Invalid;
 
         public void Init()
@@ -70,7 +74,16 @@ namespace Logic
 
         public void ProcessAction()
         {
-            if (_lastActionInfo != null) _actionProcessor.ProcessAction(_lastActionInfo);
+            if (_lastActionInfo != null) LastActionResult = _actionProcessor.ProcessAction(_lastActionInfo);
+        }
+
+        public void VisualizeAction()
+        {
+            if (LastActionResult != null)
+            {
+                OnVisualizationStarted.Invoke(_lastActionInfo, LastActionResult);
+                LastActionResult = null;
+            }
         }
     }
 }
