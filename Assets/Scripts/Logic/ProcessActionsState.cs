@@ -9,6 +9,7 @@ namespace Logic
         public void EnterState(GameStateMachine gameStateMachine)
         {
             Debug.Log($"Enter state: {Id}");
+            gameStateMachine.ProcessAction();
             gameStateMachine.SetGameState<VisualizeActionsState>();
         }
     }

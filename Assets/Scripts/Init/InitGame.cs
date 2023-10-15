@@ -22,5 +22,10 @@ namespace Init
         {
             _gameStateMachine.Update();
         }
+
+        private void OnDestroy()
+        {
+            _gameStateMachine.Terminate();
+        }
     }
 }

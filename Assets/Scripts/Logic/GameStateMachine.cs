@@ -8,6 +8,7 @@ namespace Logic
 {
     public class GameStateMachine
     {
+        private readonly ActionProcessor _actionProcessor = new();
         private readonly Dictionary<Type, IGameState> _gameStates = new();
 
         public readonly UnityEvent<ActionInfo> OnActionSubmitted = new();
@@ -23,6 +24,16 @@ namespace Logic
             _gameStates.Add(typeof(AwaitingInputGameState), new AwaitingInputGameState());
             _gameStates.Add(typeof(ProcessActionsState), new ProcessActionsState());
             _gameStates.Add(typeof(VisualizeActionsState), new VisualizeActionsState());
+
+            _actionProcessor.Init();
+        }
+
+        public void Terminate()
+        {
+            _actionProcessor.Terminate();
+
+            _gameStates.Clear();
+            ResetSubmittedAction();
         }
 
         public void SetGameState<TGameState>() where TGameState : IGameState
@@ -55,6 +66,11 @@ namespace Logic
             _lastActionInfo = actionInfo;
             OnActionSubmitted.Invoke(_lastActionInfo);
             return true;
+        }
+
+        public void ProcessAction()
+        {
+            if (_lastActionInfo != null) _actionProcessor.ProcessAction(_lastActionInfo);
         }
     }
 }
