@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Logic.Characters
 {
@@ -36,6 +37,8 @@ namespace Logic.Characters
                 0 => EnemyTeamId,
                 _ => PlayerTeamId
             };
+
+            Debug.Log($"Current Team : {CurrentTeamId}");
         }
     }
 }
