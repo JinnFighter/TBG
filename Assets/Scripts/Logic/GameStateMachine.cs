@@ -1,96 +1,60 @@
-using System;
 using System.Collections.Generic;
-using Logic.Actions;
-using Logic.Characters;
+using Logic.TurnSteps;
 using UnityEngine;
 using UnityEngine.Events;
-using CharacterInfo = Logic.Characters.CharacterInfo;
 
 namespace Logic
 {
     public class GameStateMachine
     {
-        private readonly ActionProcessor _actionProcessor = new();
-        private readonly Dictionary<Type, IGameState> _gameStates = new();
+        private readonly List<IGameStep> _gameSteps = new();
+        private readonly TurnContext _turnContext = new();
 
-        public readonly UnityEvent<ActionInfo> OnActionSubmitted = new();
-        public readonly UnityEvent OnVisualizationFinished = new();
-        public readonly UnityEvent<ActionInfo, ActionResultContainer> OnVisualizationStarted = new();
+        private int _currentStepIndex = -1;
+        public UnityEvent<EGameStep> OnStateEnter { get; } = new();
 
-        private IGameState _currentGameState;
-
-        private ActionInfo _lastActionInfo;
-
-        public CharactersContainer CharactersContainer { get; } = new();
-
-        public ActionResultContainer LastActionResult { get; private set; }
-        public EGameState CurrentState => _currentGameState?.Id ?? EGameState.Invalid;
-
-        public void Init()
+        public void Init(List<IGameStep> gameSteps)
         {
-            _gameStates.Add(typeof(SelectTeamGameState), new SelectTeamGameState());
-            _gameStates.Add(typeof(AwaitingInputGameState), new AwaitingInputGameState());
-            _gameStates.Add(typeof(ProcessActionsState), new ProcessActionsState());
-            _gameStates.Add(typeof(VisualizeActionsState), new VisualizeActionsState());
-
-            CharactersContainer.Init(new List<CharacterInfo>
-            {
-                new(0, "Player", CharactersContainer.PlayerTeamId),
-                new(1, "Enemy", CharactersContainer.EnemyTeamId)
-            });
-
-            _actionProcessor.Init();
+            _gameSteps.Clear();
+            _gameSteps.AddRange(gameSteps);
         }
 
         public void Terminate()
         {
-            ResetSubmittedAction();
-            _actionProcessor.Terminate();
-            CharactersContainer.Terminate();
-            _gameStates.Clear();
+            var currentStep = _gameSteps[_currentStepIndex];
+            currentStep.ExitStep(_turnContext);
+            currentStep.StepCompleted.RemoveListener(HandleStepCompleted);
+            _currentStepIndex = -1;
+            _gameSteps.Clear();
         }
 
-        public void SetGameState<TGameState>() where TGameState : IGameState
+        public void GoToNextState()
         {
-            if (!_gameStates.TryGetValue(typeof(TGameState), out var gameState)) return;
-
-            _currentGameState = gameState;
-            _currentGameState?.EnterState(this);
+            var nextStateIndex = GetNextStepIndex();
+            _currentStepIndex = nextStateIndex;
+            var nextStep = _gameSteps[_currentStepIndex];
+            nextStep.StepCompleted.AddListener(HandleStepCompleted);
+            Debug.Log($"Enter step: {_gameSteps[_currentStepIndex].Id}");
+            nextStep.EnterStep(_turnContext);
+            OnStateEnter.Invoke(nextStep.Id);
+            Debug.Log($"Do step: {_gameSteps[_currentStepIndex].Id}");
+            nextStep.DoStep(_turnContext);
         }
 
-        public void Update()
+        private void HandleStepCompleted()
         {
-            if (Input.GetMouseButtonDown(0) && CharactersContainer.CurrentTeamId == CharactersContainer.PlayerTeamId)
-                TrySubmitAction(new ActionInfo
-                {
-                    ActionId = "test",
-                    CasterId = 0
-                });
+            var currentStep = _gameSteps[_currentStepIndex];
+            currentStep.StepCompleted.RemoveListener(HandleStepCompleted);
+            Debug.Log($"Exit step: {currentStep.Id}");
+            currentStep.ExitStep(_turnContext);
+            GoToNextState();
         }
 
-        public void ResetSubmittedAction()
+        private int GetNextStepIndex()
         {
-            _lastActionInfo = null;
-            LastActionResult = null;
-        }
-
-        public bool TrySubmitAction(ActionInfo actionInfo)
-        {
-            if (_lastActionInfo != null) return false;
-
-            _lastActionInfo = actionInfo;
-            OnActionSubmitted.Invoke(_lastActionInfo);
-            return true;
-        }
-
-        public void ProcessAction()
-        {
-            if (_lastActionInfo != null) LastActionResult = _actionProcessor.ProcessAction(_lastActionInfo);
-        }
-
-        public void VisualizeAction()
-        {
-            if (LastActionResult != null) OnVisualizationStarted.Invoke(_lastActionInfo, LastActionResult);
+            var nextStateIndex = _currentStepIndex < 0 ? 0 :
+                _currentStepIndex < _gameSteps.Count - 1 ? _currentStepIndex + 1 : 0;
+            return nextStateIndex;
         }
     }
 }

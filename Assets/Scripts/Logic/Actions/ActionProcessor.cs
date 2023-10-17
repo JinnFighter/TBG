@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Logic.Actions
 {
-    public class ActionProcessor
+    public class ActionProcessor : IActionProcessor
     {
         private readonly List<IActionLogic> _actionLogics = new();
 

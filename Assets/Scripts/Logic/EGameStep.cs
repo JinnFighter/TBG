@@ -1,6 +1,6 @@
 namespace Logic
 {
-    public enum EGameState
+    public enum EGameStep
     {
         Invalid,
         SelectingTeam,
