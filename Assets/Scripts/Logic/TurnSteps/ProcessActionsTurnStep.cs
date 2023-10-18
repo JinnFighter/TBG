@@ -1,18 +1,17 @@
 ﻿using Logic.Actions;
-using Logic.TurnSteps;
 
-namespace Logic
+namespace Logic.TurnSteps
 {
-    public class ProcessActionsStep : BaseGameStep
+    public class ProcessActionsTurnStep : BaseTurnStep
     {
         private readonly IActionProcessor _actionProcessor;
 
-        public ProcessActionsStep(IActionProcessor actionProcessor)
+        public ProcessActionsTurnStep(IActionProcessor actionProcessor)
         {
             _actionProcessor = actionProcessor;
         }
 
-        public override EGameStep Id => EGameStep.ProcessActions;
+        public override ETurnStep Id => ETurnStep.ProcessActions;
 
         protected override void DoStepInner(TurnContext turnContext)
         {

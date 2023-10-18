@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Logic;
 using Logic.Actions;
 using Logic.Characters;
+using Logic.TurnSteps;
 using UnityEngine;
 using Visuals;
 using CharacterInfo = Logic.Characters.CharacterInfo;
@@ -14,6 +15,8 @@ namespace Init
         private IActionSubmitter _actionSubmitter;
         private CharactersContainer _charactersContainer;
         private GameStateMachine _gameStateMachine;
+
+        private ETurnStep _turnStep = ETurnStep.Invalid;
         private IVisualizerService _visualizerService;
 
         private void Awake()
@@ -27,18 +30,19 @@ namespace Init
 
         private void Start()
         {
-            _gameStateMachine.Init(new List<IGameStep>
+            _gameStateMachine.Init(new List<ITurnStep>
             {
-                new SelectTeamGameStep(_charactersContainer),
-                new AwaitingInputGameStep(_actionSubmitter),
-                new ProcessActionsStep(_actionProcessor),
-                new VisualizeActionsStep(_visualizerService)
+                new SelectTeamTurnStep(_charactersContainer),
+                new AwaitingInputTurnStep(_actionSubmitter),
+                new ProcessActionsTurnStep(_actionProcessor),
+                new VisualizeActionsTurnStep(_visualizerService),
+                new CheckTurnOverTurnStep(_charactersContainer)
             });
 
             _charactersContainer.Init(new List<CharacterInfo>
             {
-                new(0, "Player", CharactersContainer.PlayerTeamId),
-                new(1, "Enemy", CharactersContainer.EnemyTeamId)
+                new(0, "Player", CharactersContainer.PlayerTeamId, new CharacterStats(10, 10)),
+                new(1, "Enemy", CharactersContainer.EnemyTeamId, new CharacterStats(10, 10))
             });
 
             _actionProcessor.Init();
@@ -50,6 +54,8 @@ namespace Init
 
         private void Update()
         {
+            if (_turnStep != ETurnStep.AwaitingInput) return;
+
             if (Input.GetMouseButtonDown(0) && _charactersContainer.CurrentTeamId == CharactersContainer.PlayerTeamId)
                 _actionSubmitter.SubmitAction(new ActionInfo
                 {
@@ -66,9 +72,10 @@ namespace Init
             _gameStateMachine.Terminate();
         }
 
-        private void HandleStepEnter(EGameStep step)
+        private void HandleStepEnter(ETurnStep step)
         {
-            if (step != EGameStep.AwaitingInput) return;
+            _turnStep = step;
+            if (step != ETurnStep.AwaitingInput) return;
 
             if (_charactersContainer.CurrentTeamId == CharactersContainer.EnemyTeamId)
                 _actionSubmitter.SubmitAction(new ActionInfo

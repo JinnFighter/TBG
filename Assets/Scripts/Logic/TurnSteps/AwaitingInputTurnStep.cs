@@ -1,20 +1,19 @@
 ﻿using Logic.Actions;
-using Logic.TurnSteps;
 using UnityEngine.Events;
 
-namespace Logic
+namespace Logic.TurnSteps
 {
-    public class AwaitingInputGameStep : BaseGameStep
+    public class AwaitingInputTurnStep : BaseTurnStep
     {
         private readonly IActionSubmitter _actionSubmitter;
         private UnityAction<ActionInfo> _action;
 
-        public AwaitingInputGameStep(IActionSubmitter actionSubmitter)
+        public AwaitingInputTurnStep(IActionSubmitter actionSubmitter)
         {
             _actionSubmitter = actionSubmitter;
         }
 
-        public override EGameStep Id => EGameStep.AwaitingInput;
+        public override ETurnStep Id => ETurnStep.AwaitingInput;
 
         protected override void EnterStepInner(TurnContext turnContext)
         {

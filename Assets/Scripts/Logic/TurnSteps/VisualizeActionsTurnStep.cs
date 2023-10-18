@@ -1,20 +1,19 @@
-﻿using Logic.TurnSteps;
-using UnityEngine.Events;
+﻿using UnityEngine.Events;
 
-namespace Logic
+namespace Logic.TurnSteps
 {
-    public class VisualizeActionsStep : BaseGameStep
+    public class VisualizeActionsTurnStep : BaseTurnStep
     {
         private readonly UnityAction _action;
         private readonly IVisualizerService _visualizerService;
 
-        public VisualizeActionsStep(IVisualizerService visualizerService)
+        public VisualizeActionsTurnStep(IVisualizerService visualizerService)
         {
             _visualizerService = visualizerService;
             _action = HandleVisualizationFinished;
         }
 
-        public override EGameStep Id => EGameStep.VisualizeActions;
+        public override ETurnStep Id => ETurnStep.VisualizeActions;
 
         protected override void EnterStepInner(TurnContext turnContext)
         {

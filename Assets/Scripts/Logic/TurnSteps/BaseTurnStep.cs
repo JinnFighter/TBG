@@ -1,12 +1,11 @@
-﻿using Logic.TurnSteps;
-using UnityEngine.Events;
+﻿using UnityEngine.Events;
 
-namespace Logic
+namespace Logic.TurnSteps
 {
-    public abstract class BaseGameStep : IGameStep
+    public abstract class BaseTurnStep : ITurnStep
     {
         public UnityEvent StepCompleted { get; } = new();
-        public abstract EGameStep Id { get; }
+        public abstract ETurnStep Id { get; }
 
         public void EnterStep(TurnContext turnContext)
         {

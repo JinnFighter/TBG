@@ -1,18 +1,17 @@
 ﻿using Logic.Characters;
-using Logic.TurnSteps;
 
-namespace Logic
+namespace Logic.TurnSteps
 {
-    public class SelectTeamGameStep : BaseGameStep
+    public class SelectTeamTurnStep : BaseTurnStep
     {
         private readonly CharactersContainer _charactersContainer;
 
-        public SelectTeamGameStep(CharactersContainer charactersContainer)
+        public SelectTeamTurnStep(CharactersContainer charactersContainer)
         {
             _charactersContainer = charactersContainer;
         }
 
-        public override EGameStep Id => EGameStep.SelectingTeam;
+        public override ETurnStep Id => ETurnStep.SelectingTeam;
 
         protected override void DoStepInner(TurnContext context)
         {
