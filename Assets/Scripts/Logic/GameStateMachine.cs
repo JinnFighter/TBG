@@ -7,13 +7,13 @@ namespace Logic
 {
     public class GameStateMachine
     {
-        private readonly List<IGameStep> _gameSteps = new();
+        private readonly List<ITurnStep> _gameSteps = new();
         private readonly TurnContext _turnContext = new();
 
         private int _currentStepIndex = -1;
-        public UnityEvent<EGameStep> OnStateEnter { get; } = new();
+        public UnityEvent<ETurnStep> OnStateEnter { get; } = new();
 
-        public void Init(List<IGameStep> gameSteps)
+        public void Init(List<ITurnStep> gameSteps)
         {
             _gameSteps.Clear();
             _gameSteps.AddRange(gameSteps);

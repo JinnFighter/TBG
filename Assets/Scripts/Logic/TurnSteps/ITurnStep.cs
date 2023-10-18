@@ -1,12 +1,11 @@
-﻿using Logic.TurnSteps;
-using UnityEngine.Events;
+﻿using UnityEngine.Events;
 
-namespace Logic
+namespace Logic.TurnSteps
 {
-    public interface IGameStep
+    public interface ITurnStep
     {
         UnityEvent StepCompleted { get; }
-        EGameStep Id { get; }
+        ETurnStep Id { get; }
         void EnterStep(TurnContext turnContext);
         void DoStep(TurnContext turnContext);
         void ExitStep(TurnContext turnContext);

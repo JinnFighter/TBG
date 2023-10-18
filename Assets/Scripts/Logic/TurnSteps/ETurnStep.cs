@@ -1,11 +1,12 @@
-namespace Logic
+namespace Logic.TurnSteps
 {
-    public enum EGameStep
+    public enum ETurnStep
     {
         Invalid,
         SelectingTeam,
         AwaitingInput,
         ProcessActions,
         VisualizeActions,
+        CheckGameOver
     }
 }
