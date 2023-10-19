@@ -25,13 +25,14 @@ namespace Visuals.UiService
             foreach (var value in Enum.GetValues(typeof(EUiLayer)))
             {
                 var layer = (EUiLayer) value;
-                foreach (var key in _widgets[layer].Widgets.Keys) CloseWidget(key, layer);
+                var keys = new List<IModel>(_widgets[layer].Widgets.Keys);
+                foreach (var key in keys) CloseWidget(key, layer);
             }
 
             _widgets.Clear();
         }
 
-        public void OpenScreen<TModel, TView>(TModel model, string widgetName, OpenParams openParams = null)
+        public TView OpenScreen<TModel, TView>(TModel model, string widgetName, OpenParams openParams = null)
             where TModel : IModel where TView : BaseView
         {
             var container = _widgets[EUiLayer.Screen];
@@ -40,7 +41,11 @@ namespace Visuals.UiService
                 var widget = Instantiate<BaseView>(_widgetPrefabContainer.GetWidget<TView>(widgetName),
                     _layerScreen.transform, true);
                 container.Widgets[model] = widget;
+
+                return widget as TView;
             }
+
+            return null;
         }
 
         public void CloseScreen<TModel, TView>(IModel model, OpenParams openParams = null)
@@ -54,8 +59,8 @@ namespace Visuals.UiService
             var container = _widgets[layer];
             if (_widgets[layer].Widgets.TryGetValue(model, out var widget))
             {
-                container.Widgets.Remove(model);
                 widget.transform.SetParent(null);
+                container.Widgets.Remove(model);
                 Destroy(widget);
             }
         }

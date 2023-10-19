@@ -5,6 +5,7 @@ using Logic.Characters;
 using Logic.TurnSteps;
 using UnityEngine;
 using Visuals;
+using Visuals.Ui.Hud;
 using Visuals.UiService;
 using CharacterInfo = Logic.Characters.CharacterInfo;
 
@@ -21,6 +22,9 @@ namespace Init
         private IVisualizerService _visualizerService;
 
         [SerializeField] private UiService _uiService;
+
+        private HudModel _hudModel;
+        private HudController _hudController;
 
         private void Awake()
         {
@@ -52,6 +56,12 @@ namespace Init
 
             _visualizerService.Init();
             _uiService.Init();
+
+            _hudModel = new HudModel();
+            _hudController =
+                new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel, "hudView"));
+            _hudController.Init();
+            
             _gameStateMachine.OnStateEnter.AddListener(HandleStepEnter);
             _gameStateMachine.GoToNextState();
         }
@@ -70,6 +80,7 @@ namespace Init
 
         private void OnDestroy()
         {
+            _hudController.Terminate();
             _uiService.Terminate();
             _gameStateMachine.OnStateEnter.RemoveListener(HandleStepEnter);
             _actionProcessor.Terminate();
