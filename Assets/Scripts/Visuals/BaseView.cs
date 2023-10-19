@@ -2,7 +2,7 @@
 
 namespace Visuals
 {
-    public abstract class View : MonoBehaviour, IView
+    public abstract class BaseView : MonoBehaviour, IView
     {
         
     }
