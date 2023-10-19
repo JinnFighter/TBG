@@ -5,6 +5,7 @@ using Logic.Characters;
 using Logic.TurnSteps;
 using UnityEngine;
 using Visuals;
+using Visuals.UiService;
 using CharacterInfo = Logic.Characters.CharacterInfo;
 
 namespace Init
@@ -18,6 +19,8 @@ namespace Init
 
         private ETurnStep _turnStep = ETurnStep.Invalid;
         private IVisualizerService _visualizerService;
+
+        [SerializeField] private UiService _uiService;
 
         private void Awake()
         {
@@ -48,6 +51,7 @@ namespace Init
             _actionProcessor.Init();
 
             _visualizerService.Init();
+            _uiService.Init();
             _gameStateMachine.OnStateEnter.AddListener(HandleStepEnter);
             _gameStateMachine.GoToNextState();
         }
@@ -66,6 +70,7 @@ namespace Init
 
         private void OnDestroy()
         {
+            _uiService.Terminate();
             _gameStateMachine.OnStateEnter.RemoveListener(HandleStepEnter);
             _actionProcessor.Terminate();
             _charactersContainer.Terminate();
