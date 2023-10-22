@@ -15,6 +15,6 @@ namespace Logic.Characters
             CharacterStats = characterStats;
         }
 
-        public bool IsBot => TeamId == CharactersContainer.PlayerTeamId;
+        public bool IsBot => TeamId == CharacterConst.PlayerTeamId;
     }
 }

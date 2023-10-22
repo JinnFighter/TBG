@@ -1,13 +1,9 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
 namespace Logic.Characters
 {
     public class CharactersContainer
     {
-        public const int PlayerTeamId = 0;
-        public const int EnemyTeamId = 1;
-        public int CurrentTeamId { get; private set; } = -1;
         public Dictionary<int, List<CharacterInfo>> CharacterTeams { get; } = new();
         public Dictionary<int, CharacterInfo> Characters { get; } = new();
 
@@ -27,18 +23,6 @@ namespace Logic.Characters
         {
             Characters.Clear();
             CharacterTeams.Clear();
-        }
-
-        public void SwitchCurrentTeam()
-        {
-            CurrentTeamId = CurrentTeamId switch
-            {
-                -1 => PlayerTeamId,
-                0 => EnemyTeamId,
-                _ => PlayerTeamId
-            };
-
-            Debug.Log($"Current Team : {CurrentTeamId}");
         }
     }
 }

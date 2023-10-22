@@ -1,21 +1,21 @@
-﻿using Logic.Characters;
+﻿using Logic.CharacterQueue;
 
 namespace Logic.TurnSteps
 {
     public class SelectTeamTurnStep : BaseTurnStep
     {
-        private readonly CharactersContainer _charactersContainer;
+        private readonly ICharacterQueue _characterQueue;
 
-        public SelectTeamTurnStep(CharactersContainer charactersContainer)
+        public SelectTeamTurnStep(ICharacterQueue characterQueue)
         {
-            _charactersContainer = charactersContainer;
+            _characterQueue = characterQueue;
         }
 
         public override ETurnStep Id => ETurnStep.SelectingTeam;
 
         protected override void DoStepInner(TurnContext context)
         {
-            _charactersContainer.SwitchCurrentTeam();
+            _characterQueue.UpdateNextActiveCharacter();
             context.ActionInfo = null;
             context.ActionResult = null;
             MarkAsComplete();
