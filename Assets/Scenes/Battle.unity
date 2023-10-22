@@ -834,7 +834,7 @@ MonoBehaviour:
   _uiService: {fileID: 1716674652}
   _characterViewContainer: {fileID: 11400000, guid: f507f9a74f766e84ea489e41492cb103, type: 2}
   _characterSpawnSlotsView: {fileID: 2007676455}
-  _attackActionConfig: {fileID: 11400000, guid: d31e2e6f91da19c4aa843d5bdd9c03fe, type: 2}
+  attackAbilityConfig: {fileID: 11400000, guid: d31e2e6f91da19c4aa843d5bdd9c03fe, type: 2}
 --- !u!4 &1382785911
 Transform:
   m_ObjectHideFlags: 0

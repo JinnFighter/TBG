@@ -12,6 +12,7 @@ namespace Logic
 
         private int _currentStepIndex = -1;
         public UnityEvent<ETurnStep> OnStateEnter { get; } = new();
+        public UnityEvent OnTurnEnd { get; } = new();
 
         public void Init(List<ITurnStep> gameSteps)
         {
@@ -47,7 +48,9 @@ namespace Logic
             currentStep.StepCompleted.RemoveListener(HandleStepCompleted);
             Debug.Log($"Exit step: {currentStep.Id}");
             currentStep.ExitStep(_turnContext);
-            GoToNextState();
+            if (_currentStepIndex >= _gameSteps.Count - 1) OnTurnEnd.Invoke();
+            else
+                GoToNextState();
         }
 
         private int GetNextStepIndex()

@@ -8,6 +8,13 @@ namespace Visuals
 {
     public class VisualizerService : IVisualizerService
     {
+        private readonly IActionProcessor _actionProcessor;
+
+        public VisualizerService(IActionProcessor actionProcessor)
+        {
+            _actionProcessor = actionProcessor;
+        }
+
         private List<IVisualizerLogic> _visualizerLogics;
         public UnityEvent OnVisualizeStarted { get; } = new();
         public UnityEvent OnVisualizeFinished { get; } = new();
@@ -15,10 +22,12 @@ namespace Visuals
         public void Init(List<IVisualizerLogic> logics)
         {
             _visualizerLogics = logics;
+            _actionProcessor.OnActionProcessingFinished.AddListener(HandleActionProcessingFinished);
         }
 
         public void Terminate()
         {
+            _actionProcessor.OnActionProcessingFinished.RemoveListener(HandleActionProcessingFinished);
             _visualizerLogics.Clear();
         }
 
@@ -30,6 +39,11 @@ namespace Visuals
                 visualizerLogic.VisualizeAction(actionInfo, actionResultContainer);
 
             OnVisualizeFinished.Invoke();
+        }
+        
+        private void HandleActionProcessingFinished(ActionInfo actionInfo, ActionResultContainer resultContainer)
+        {
+            VisualizeAction(actionInfo, resultContainer);
         }
     }
 }
