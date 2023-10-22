@@ -1,19 +1,20 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 using Visuals.Ui.Hud;
 
 namespace Visuals.UiService
 {
     [CreateAssetMenu(menuName = "Create WidgetContainer", fileName = "WidgetContainer", order = 0)]
-    public class WidgetContainer : ScriptableObject
+    public class WidgetContainer : BaseViewContainer
     {
         [SerializeField] private HudView _hudView;
-        
-        public T GetWidget<T>(string widgetName) where T : BaseView
+
+        public override void Init()
         {
-            return widgetName switch
+            Views = new Dictionary<Type, BaseView>
             {
-                "hudView" => _hudView as T,
-                _ => null
+                {typeof(HudView), _hudView}
             };
         }
     }

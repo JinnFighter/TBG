@@ -7,7 +7,8 @@ namespace Visuals.UiService
     public class UiService : MonoBehaviour, IUiService
     {
         [SerializeField] private Canvas _layerScreen;
-        [SerializeField] private WidgetContainer _widgetPrefabContainer;
+
+        [SerializeField] private ViewPool _viewPool;
 
         private readonly Dictionary<EUiLayer, LayerWidgetsContainer> _widgets = new()
         {
@@ -17,6 +18,7 @@ namespace Visuals.UiService
         public void Init()
         {
             Debug.Log("Init Ui Service");
+            _viewPool.Init();
         }
 
         public void Terminate()
@@ -30,6 +32,8 @@ namespace Visuals.UiService
             }
 
             _widgets.Clear();
+
+            _viewPool.Terminate();
         }
 
         public TView OpenScreen<TModel, TView>(TModel model, string widgetName, OpenParams openParams = null)
@@ -38,11 +42,11 @@ namespace Visuals.UiService
             var container = _widgets[EUiLayer.Screen];
             if (!container.Widgets.ContainsKey(model))
             {
-                var widget = Instantiate<BaseView>(_widgetPrefabContainer.GetWidget<TView>(widgetName),
-                    _layerScreen.transform, true);
+                var widget = _viewPool.TakeItem<TView>();
+                widget.transform.SetParent(_layerScreen.transform, false);
                 container.Widgets[model] = widget;
 
-                return widget as TView;
+                return widget;
             }
 
             return null;
@@ -59,9 +63,8 @@ namespace Visuals.UiService
             var container = _widgets[layer];
             if (_widgets[layer].Widgets.TryGetValue(model, out var widget))
             {
-                widget.transform.SetParent(null);
+                _viewPool.Release(widget);
                 container.Widgets.Remove(model);
-                Destroy(widget);
             }
         }
     }

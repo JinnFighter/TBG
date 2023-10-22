@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa6c368baa0a452b93b0d3e59299ad81, type: 3}
   m_Name: WidgetContainer
   m_EditorClassIdentifier: 
-  _hudView: {fileID: 8312792613373238271, guid: d29610bc5ea2a5c488cd830bf4468101, type: 3}
+  _hudView: {fileID: 6665413245863976372, guid: d29610bc5ea2a5c488cd830bf4468101, type: 3}
