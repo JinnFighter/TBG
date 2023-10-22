@@ -5,9 +5,9 @@ namespace Logic.Characters
         public readonly CharacterStats CharacterStats;
         public readonly int Id;
         public readonly string Name;
-        public readonly int TeamId;
+        public readonly ECharacterTeam TeamId;
 
-        public CharacterInfo(int id, string name, int teamId, CharacterStats characterStats)
+        public CharacterInfo(int id, string name, ECharacterTeam teamId, CharacterStats characterStats)
         {
             Id = id;
             Name = name;
@@ -15,6 +15,6 @@ namespace Logic.Characters
             CharacterStats = characterStats;
         }
 
-        public bool IsBot => TeamId == CharactersContainer.PlayerTeamId;
+        public bool IsBot => TeamId == ECharacterTeam.Player;
     }
 }
