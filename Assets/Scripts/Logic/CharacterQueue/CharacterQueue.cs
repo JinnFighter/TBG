@@ -9,7 +9,7 @@ namespace Logic.CharacterQueue
         private readonly Dictionary<int, LinkedListNode<int>> _characterNodes = new();
         private readonly LinkedList<int> _queue = new();
 
-        public int CurrentTeamId { get; private set; } = -1;
+        public ECharacterTeam CurrentTeamId { get; private set; } = ECharacterTeam.Invalid;
         public int CurrentActiveCharacter { get; private set; } = -1;
 
         public void Init(IEnumerable<int> characterIds)
@@ -35,9 +35,9 @@ namespace Logic.CharacterQueue
 
             CurrentTeamId = CurrentTeamId switch
             {
-                -1 => CharacterConst.PlayerTeamId,
-                0 => CharacterConst.EnemyTeamId,
-                _ => CharacterConst.PlayerTeamId
+                ECharacterTeam.Invalid => ECharacterTeam.Player,
+                ECharacterTeam.Player => ECharacterTeam.Enemy,
+                _ => ECharacterTeam.Player
             };
 
             Debug.Log($"Current Team : {CurrentTeamId}");

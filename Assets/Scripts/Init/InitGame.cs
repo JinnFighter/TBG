@@ -55,8 +55,8 @@ namespace Init
 
             _charactersContainer.Init(new List<CharacterInfo>
             {
-                new(0, "Player", CharacterConst.PlayerTeamId, new CharacterStats(10, 10)),
-                new(1, "Enemy", CharacterConst.EnemyTeamId, new CharacterStats(10, 10))
+                new(0, "Player", ECharacterTeam.Player, new CharacterStats(10, 10)),
+                new(1, "Enemy", ECharacterTeam.Enemy, new CharacterStats(10, 10))
             });
 
             _actionProcessor.Init();
@@ -80,7 +80,7 @@ namespace Init
         {
             if (_turnStep != ETurnStep.AwaitingInput) return;
 
-            if (Input.GetMouseButtonDown(0) && _characterQueue.CurrentTeamId == CharacterConst.PlayerTeamId)
+            if (Input.GetMouseButtonDown(0) && _characterQueue.CurrentTeamId == ECharacterTeam.Player)
                 _actionSubmitter.SubmitAction(new ActionInfo
                 {
                     ActionId = "test",

@@ -31,7 +31,7 @@ namespace Logic.AI
 
         private void HandleStateChanged(ETurnStep step)
         {
-            if (step != ETurnStep.AwaitingInput || _characterQueue.CurrentTeamId != CharacterConst.EnemyTeamId) return;
+            if (step != ETurnStep.AwaitingInput || _characterQueue.CurrentTeamId != ECharacterTeam.Enemy) return;
 
             _actionSubmitter.SubmitAction(new ActionInfo
             {

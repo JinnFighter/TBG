@@ -17,10 +17,10 @@ namespace Logic.TurnSteps
 
         protected override void DoStepInner(TurnContext turnContext)
         {
-            if (_charactersContainer.CharacterTeams[CharacterConst.PlayerTeamId]
+            if (_charactersContainer.CharacterTeams[ECharacterTeam.Player]
                 .All(character => character.CharacterStats.Health <= 0))
                 Debug.Log("Game over => enemy wins!");
-            else if (_charactersContainer.CharacterTeams[CharacterConst.EnemyTeamId]
+            else if (_charactersContainer.CharacterTeams[ECharacterTeam.Enemy]
                      .All(character => character.CharacterStats.Health <= 0))
                 Debug.Log("Game over => player wins!");
             else

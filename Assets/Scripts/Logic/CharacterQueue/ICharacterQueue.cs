@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using Logic.Characters;
 
 namespace Logic.CharacterQueue
 {
     public interface ICharacterQueue
     {
-        int CurrentTeamId { get; }
+        ECharacterTeam CurrentTeamId { get; }
         int CurrentActiveCharacter { get; }
         void Init(IEnumerable<int> characterIds);
         void Terminate();
