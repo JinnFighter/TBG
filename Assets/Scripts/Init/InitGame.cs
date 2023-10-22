@@ -8,6 +8,8 @@ using Logic.Characters;
 using Logic.TurnSteps;
 using UnityEngine;
 using Visuals;
+using Visuals.BattleField;
+using Visuals.Characters;
 using Visuals.Ui.Hud;
 using Visuals.UiService;
 using CharacterInfo = Logic.Characters.CharacterInfo;
@@ -17,9 +19,13 @@ namespace Init
     public class InitGame : MonoBehaviour
     {
         [SerializeField] private UiService _uiService;
+
+        [SerializeField] private CharacterViewContainer _characterViewContainer;
+        [SerializeField] private CharacterSpawnSlotsView _characterSpawnSlotsView;
         private IActionProcessor _actionProcessor;
         private IActionSubmitter _actionSubmitter;
         private IAiActionSubmitter _aiActionSubmitter;
+        private List<BattleCharacterController> _characterControllers;
         private ICharacterQueue _characterQueue;
         private CharactersContainer _charactersContainer;
         private GameStateMachine _gameStateMachine;
@@ -72,6 +78,24 @@ namespace Init
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
             _hudController.Init();
 
+            _characterViewContainer.Init();
+
+            _characterControllers = new List<BattleCharacterController>();
+            foreach (var character in _charactersContainer.Characters)
+            {
+                CharacterView characterView = character.Value.TeamId == ECharacterTeam.Player
+                    ? _characterViewContainer.GetView<PlayerCharacterView>()
+                    : _characterViewContainer.GetView<EnemyCharacterView>();
+
+                var controller = new BattleCharacterController(new CharacterModel(),
+                    Instantiate(characterView,
+                        character.Value.TeamId == ECharacterTeam.Player
+                            ? _characterSpawnSlotsView.PlayerTeamSpawnSlots[0].transform
+                            : _characterSpawnSlotsView.EnemyTeamSpawnSlots[0].transform));
+                _characterControllers.Add(controller);
+                controller.Init();
+            }
+
             _gameStateMachine.OnStateEnter.AddListener(HandleStepEnter);
             _gameStateMachine.GoToNextState();
         }
@@ -90,6 +114,7 @@ namespace Init
 
         private void OnDestroy()
         {
+            foreach (var characterController in _characterControllers) characterController.Terminate();
             _hudController.Terminate();
             _uiService.Terminate();
             _gameStateMachine.OnStateEnter.RemoveListener(HandleStepEnter);
