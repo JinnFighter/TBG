@@ -12,6 +12,7 @@ using Visuals.BattleField;
 using Visuals.Characters;
 using Visuals.Ui.Hud;
 using Visuals.UiService;
+using Visuals.VisualizerLogic;
 using CharacterInfo = Logic.Characters.CharacterInfo;
 
 namespace Init
@@ -25,6 +26,7 @@ namespace Init
         private IActionProcessor _actionProcessor;
         private IActionSubmitter _actionSubmitter;
         private IAiActionSubmitter _aiActionSubmitter;
+        private BattleCharactersModel _battleCharactersModel;
         private List<BattleCharacterController> _characterControllers;
         private ICharacterQueue _characterQueue;
         private CharactersContainer _charactersContainer;
@@ -33,18 +35,17 @@ namespace Init
 
         private HudModel _hudModel;
 
-        private ETurnStep _turnStep = ETurnStep.Invalid;
         private IVisualizerService _visualizerService;
 
         private void Awake()
         {
-            _actionProcessor = new ActionProcessor();
+            _charactersContainer = new CharactersContainer();
+            _actionProcessor = new ActionProcessor(_charactersContainer);
             _actionSubmitter = new ActionSubmitter();
             _characterQueue = new CharacterQueue();
-            _charactersContainer = new CharactersContainer();
+
             _gameStateMachine = new GameStateMachine();
             _aiActionSubmitter = new AiActionSubmitter(_gameStateMachine, _actionSubmitter, _characterQueue);
-
             _visualizerService = new VisualizerService();
         }
 
@@ -65,15 +66,24 @@ namespace Init
                 new(1, "Enemy", ECharacterTeam.Enemy, new CharacterStats(10, 10))
             });
 
-            _actionProcessor.Init();
-
             _characterQueue.Init(_charactersContainer.Characters.Select(character => character.Value.Id));
+
+            _actionProcessor.Init();
             _aiActionSubmitter.Init();
 
-            _visualizerService.Init();
             _uiService.Init();
 
-            _hudModel = new HudModel();
+            _battleCharactersModel = new BattleCharactersModel(_charactersContainer.Characters);
+
+            _visualizerService.Init(new List<IVisualizerLogic>
+            {
+                new AttackVisualizerLogic(_battleCharactersModel)
+            });
+            _hudModel = new HudModel(new PlayerActionsHudModel(new List<IPlayerActionHudModel>
+            {
+                new PlayerActionHudModel("attack", 0, 1, _actionSubmitter)
+            }), _battleCharactersModel.CharacterModels[0].CharacterStatsModel);
+
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
             _hudController.Init();
@@ -81,35 +91,22 @@ namespace Init
             _characterViewContainer.Init();
 
             _characterControllers = new List<BattleCharacterController>();
-            foreach (var character in _charactersContainer.Characters)
+            foreach (var character in _battleCharactersModel.CharacterModels)
             {
-                CharacterView characterView = character.Value.TeamId == ECharacterTeam.Player
+                CharacterView characterView = character.Value.Team.Value == ECharacterTeam.Player
                     ? _characterViewContainer.GetView<PlayerCharacterView>()
                     : _characterViewContainer.GetView<EnemyCharacterView>();
 
-                var controller = new BattleCharacterController(new CharacterModel(),
+                var controller = new BattleCharacterController(_battleCharactersModel.CharacterModels[character.Key],
                     Instantiate(characterView,
-                        character.Value.TeamId == ECharacterTeam.Player
+                        character.Value.Team.Value == ECharacterTeam.Player
                             ? _characterSpawnSlotsView.PlayerTeamSpawnSlots[0].transform
                             : _characterSpawnSlotsView.EnemyTeamSpawnSlots[0].transform));
                 _characterControllers.Add(controller);
                 controller.Init();
             }
 
-            _gameStateMachine.OnStateEnter.AddListener(HandleStepEnter);
             _gameStateMachine.GoToNextState();
-        }
-
-        private void Update()
-        {
-            if (_turnStep != ETurnStep.AwaitingInput) return;
-
-            if (Input.GetMouseButtonDown(0) && _characterQueue.CurrentTeamId == ECharacterTeam.Player)
-                _actionSubmitter.SubmitAction(new ActionInfo
-                {
-                    ActionId = "test",
-                    CasterId = 0
-                });
         }
 
         private void OnDestroy()
@@ -117,17 +114,11 @@ namespace Init
             foreach (var characterController in _characterControllers) characterController.Terminate();
             _hudController.Terminate();
             _uiService.Terminate();
-            _gameStateMachine.OnStateEnter.RemoveListener(HandleStepEnter);
             _aiActionSubmitter.Terminate();
             _characterQueue.Terminate();
             _actionProcessor.Terminate();
             _charactersContainer.Terminate();
             _gameStateMachine.Terminate();
-        }
-
-        private void HandleStepEnter(ETurnStep step)
-        {
-            _turnStep = step;
         }
     }
 }

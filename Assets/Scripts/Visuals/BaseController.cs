@@ -1,12 +1,14 @@
 using System.Collections.Generic;
+using Reactivity;
 
 namespace Visuals
 {
     public abstract class BaseController<TModel, TView> : IController where TModel : IModel where TView : IView
     {
         private readonly List<IController> _childControllers = new();
-        protected TModel Model;
-        protected TView View;
+        protected readonly TModel Model;
+        protected readonly SubscriptionAggregator SubscriptionAggregator = new();
+        protected readonly TView View;
 
         protected BaseController(TModel model, TView view)
         {
@@ -27,6 +29,8 @@ namespace Visuals
             foreach (var controller in _childControllers) controller.Terminate();
 
             _childControllers.Clear();
+
+            SubscriptionAggregator.Unsubscribe();
 
             TerminateInner();
         }

@@ -35,8 +35,9 @@ namespace Logic.AI
 
             _actionSubmitter.SubmitAction(new ActionInfo
             {
-                ActionId = "test",
-                CasterId = _characterQueue.CurrentActiveCharacter
+                ActionId = "attack",
+                CasterId = _characterQueue.CurrentActiveCharacter,
+                TargetId = 0
             });
         }
     }
