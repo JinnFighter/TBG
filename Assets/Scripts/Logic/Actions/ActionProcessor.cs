@@ -1,22 +1,15 @@
 using System.Collections.Generic;
 using Logic.Actions.ActionLogic;
-using Logic.Characters;
 
 namespace Logic.Actions
 {
     public class ActionProcessor : IActionProcessor
     {
-        private readonly List<IActionLogic> _actionLogics = new();
-        private readonly CharactersContainer _charactersContainer;
+        private List<IActionLogic> _actionLogics = new();
 
-        public ActionProcessor(CharactersContainer charactersContainer)
+        public void Init(List<IActionLogic> actionLogics)
         {
-            _charactersContainer = charactersContainer;
-        }
-
-        public void Init()
-        {
-            _actionLogics.Add(new DamageActionLogic(_charactersContainer));
+            _actionLogics = actionLogics;
         }
 
         public void Terminate()

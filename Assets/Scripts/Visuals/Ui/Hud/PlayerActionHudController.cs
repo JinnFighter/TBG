@@ -2,9 +2,9 @@
 
 namespace Visuals.Ui.Hud
 {
-    public class PlayerActionHudController : BaseController<IPlayerActionHudModel, PlayerActionHudView>
+    public class PlayerActionHudController : BaseController<IPlayerAbilityHudModel, PlayerActionHudView>
     {
-        public PlayerActionHudController(IPlayerActionHudModel model, PlayerActionHudView view) : base(model, view)
+        public PlayerActionHudController(IPlayerAbilityHudModel model, PlayerActionHudView view) : base(model, view)
         {
         }
 

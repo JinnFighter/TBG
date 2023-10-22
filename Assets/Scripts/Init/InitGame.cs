@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Logic;
 using Logic.Actions;
+using Logic.Actions.ActionLogic;
 using Logic.AI;
 using Logic.CharacterQueue;
 using Logic.Characters;
+using Logic.Config;
 using Logic.TurnSteps;
 using UnityEngine;
 using Visuals;
@@ -23,6 +25,9 @@ namespace Init
 
         [SerializeField] private CharacterViewContainer _characterViewContainer;
         [SerializeField] private CharacterSpawnSlotsView _characterSpawnSlotsView;
+
+        [SerializeField] private AttackAbilityConfig attackAbilityConfig;
+
         private IActionProcessor _actionProcessor;
         private IActionSubmitter _actionSubmitter;
         private IAiActionSubmitter _aiActionSubmitter;
@@ -40,12 +45,13 @@ namespace Init
         private void Awake()
         {
             _charactersContainer = new CharactersContainer();
-            _actionProcessor = new ActionProcessor(_charactersContainer);
+            _actionProcessor = new ActionProcessor();
             _actionSubmitter = new ActionSubmitter();
             _characterQueue = new CharacterQueue();
 
             _gameStateMachine = new GameStateMachine();
-            _aiActionSubmitter = new AiActionSubmitter(_gameStateMachine, _actionSubmitter, _characterQueue);
+            _aiActionSubmitter =
+                new AiActionSubmitter(_gameStateMachine, _actionSubmitter, _characterQueue, attackAbilityConfig);
             _visualizerService = new VisualizerService();
         }
 
@@ -62,13 +68,26 @@ namespace Init
 
             _charactersContainer.Init(new List<CharacterInfo>
             {
-                new(0, "Player", ECharacterTeam.Player, new CharacterStats(10, 10)),
-                new(1, "Enemy", ECharacterTeam.Enemy, new CharacterStats(10, 10))
+                new(new CharacterData(0, "Player", ECharacterTeam.Player), new CharacterStats(10, 10),
+                    new CharacterAbilities(
+                        new List<BaseAbilityConfig>
+                        {
+                            attackAbilityConfig
+                        })),
+                new(new CharacterData(1, "Enemy", ECharacterTeam.Enemy), new CharacterStats(10, 10),
+                    new CharacterAbilities(
+                        new List<BaseAbilityConfig>
+                        {
+                            attackAbilityConfig
+                        }))
             });
 
-            _characterQueue.Init(_charactersContainer.Characters.Select(character => character.Value.Id));
+            _characterQueue.Init(_charactersContainer.Characters.Select(character => character.Value.CharacterData.Id));
 
-            _actionProcessor.Init();
+            _actionProcessor.Init(new List<IActionLogic>
+            {
+                new DamageActionLogic(_charactersContainer, attackAbilityConfig)
+            });
             _aiActionSubmitter.Init();
 
             _uiService.Init();
@@ -77,12 +96,10 @@ namespace Init
 
             _visualizerService.Init(new List<IVisualizerLogic>
             {
-                new AttackVisualizerLogic(_battleCharactersModel)
+                new AttackVisualizerLogic(_battleCharactersModel, attackAbilityConfig)
             });
-            _hudModel = new HudModel(new PlayerActionsHudModel(new List<IPlayerActionHudModel>
-            {
-                new PlayerActionHudModel("attack", 0, 1, _actionSubmitter)
-            }), _battleCharactersModel.CharacterModels[0].CharacterStatsModel);
+            _hudModel = new HudModel(_battleCharactersModel.CharacterModels[0],
+                _actionSubmitter);
 
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
@@ -93,13 +110,13 @@ namespace Init
             _characterControllers = new List<BattleCharacterController>();
             foreach (var character in _battleCharactersModel.CharacterModels)
             {
-                CharacterView characterView = character.Value.Team.Value == ECharacterTeam.Player
+                CharacterView characterView = character.Value.CharacterDataModel.TeamId.Value == ECharacterTeam.Player
                     ? _characterViewContainer.GetView<PlayerCharacterView>()
                     : _characterViewContainer.GetView<EnemyCharacterView>();
 
                 var controller = new BattleCharacterController(_battleCharactersModel.CharacterModels[character.Key],
                     Instantiate(characterView,
-                        character.Value.Team.Value == ECharacterTeam.Player
+                        character.Value.CharacterDataModel.TeamId.Value == ECharacterTeam.Player
                             ? _characterSpawnSlotsView.PlayerTeamSpawnSlots[0].transform
                             : _characterSpawnSlotsView.EnemyTeamSpawnSlots[0].transform));
                 _characterControllers.Add(controller);
