@@ -8,6 +8,7 @@
 
         protected override void InitInner()
         {
+            RegisterChildController(new CharacterStatsHudController(Model.CharacterStatsModel, View.StatsHudView));
             RegisterChildController(new PlayerActionsHudController(Model.PlayerActionsHudModel,
                 View.PlayerActionsHudView));
         }

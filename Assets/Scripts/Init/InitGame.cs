@@ -76,7 +76,7 @@ namespace Init
             _hudModel = new HudModel(new PlayerActionsHudModel(new List<IPlayerActionHudModel>
             {
                 new PlayerActionHudModel("attack", 0, 1, _actionSubmitter)
-            }));
+            }), new CharacterStatsModel(_charactersContainer.Characters[0].Name, _charactersContainer.Characters[0].CharacterStats.Health, _charactersContainer.Characters[0].CharacterStats.MaxHealth));
 
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
