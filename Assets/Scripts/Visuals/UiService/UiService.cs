@@ -36,7 +36,7 @@ namespace Visuals.UiService
             _viewPool.Terminate();
         }
 
-        public TView OpenScreen<TModel, TView>(TModel model, string widgetName, OpenParams openParams = null)
+        public TView OpenScreen<TModel, TView>(TModel model, OpenParams openParams = null)
             where TModel : IModel where TView : BaseView
         {
             var container = _widgets[EUiLayer.Screen];

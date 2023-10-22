@@ -69,7 +69,7 @@ namespace Init
 
             _hudModel = new HudModel();
             _hudController =
-                new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel, "hudView"));
+                new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
             _hudController.Init();
 
             _gameStateMachine.OnStateEnter.AddListener(HandleStepEnter);
