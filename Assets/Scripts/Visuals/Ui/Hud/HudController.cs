@@ -5,5 +5,11 @@
         public HudController(HudModel model, HudView view) : base(model, view)
         {
         }
+
+        protected override void InitInner()
+        {
+            RegisterChildController(new PlayerActionsHudController(Model.PlayerActionsHudModel,
+                View.PlayerActionsHudView));
+        }
     }
 }

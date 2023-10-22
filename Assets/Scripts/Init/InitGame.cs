@@ -33,7 +33,6 @@ namespace Init
 
         private HudModel _hudModel;
 
-        private ETurnStep _turnStep = ETurnStep.Invalid;
         private IVisualizerService _visualizerService;
 
         private void Awake()
@@ -73,7 +72,11 @@ namespace Init
             _visualizerService.Init();
             _uiService.Init();
 
-            _hudModel = new HudModel();
+            _hudModel = new HudModel(new PlayerActionsHudModel(new List<IPlayerActionHudModel>
+            {
+                new PlayerActionHudModel("test", 0, _actionSubmitter)
+            }));
+
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
             _hudController.Init();
@@ -96,20 +99,7 @@ namespace Init
                 controller.Init();
             }
 
-            _gameStateMachine.OnStateEnter.AddListener(HandleStepEnter);
             _gameStateMachine.GoToNextState();
-        }
-
-        private void Update()
-        {
-            if (_turnStep != ETurnStep.AwaitingInput) return;
-
-            if (Input.GetMouseButtonDown(0) && _characterQueue.CurrentTeamId == ECharacterTeam.Player)
-                _actionSubmitter.SubmitAction(new ActionInfo
-                {
-                    ActionId = "test",
-                    CasterId = 0
-                });
         }
 
         private void OnDestroy()
@@ -117,17 +107,11 @@ namespace Init
             foreach (var characterController in _characterControllers) characterController.Terminate();
             _hudController.Terminate();
             _uiService.Terminate();
-            _gameStateMachine.OnStateEnter.RemoveListener(HandleStepEnter);
             _aiActionSubmitter.Terminate();
             _characterQueue.Terminate();
             _actionProcessor.Terminate();
             _charactersContainer.Terminate();
             _gameStateMachine.Terminate();
-        }
-
-        private void HandleStepEnter(ETurnStep step)
-        {
-            _turnStep = step;
         }
     }
 }
