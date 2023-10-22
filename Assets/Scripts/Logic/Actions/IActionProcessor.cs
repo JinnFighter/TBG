@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Logic.Actions.ActionLogic;
+using UnityEngine.Events;
 
 namespace Logic.Actions
 {
@@ -8,5 +9,6 @@ namespace Logic.Actions
         void Init(List<IActionLogic> logics);
         void Terminate();
         ActionResultContainer ProcessAction(ActionInfo actionInfo);
+        UnityEvent<ActionInfo, ActionResultContainer> OnActionProcessingFinished { get; }
     }
 }

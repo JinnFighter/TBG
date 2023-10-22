@@ -1,13 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using Logic;
-using Logic.Actions;
-using Logic.Actions.ActionLogic;
-using Logic.AI;
-using Logic.CharacterQueue;
+using Logic.BattleService;
 using Logic.Characters;
 using Logic.Config;
-using Logic.TurnSteps;
 using UnityEngine;
 using Visuals;
 using Visuals.BattleField;
@@ -27,15 +22,11 @@ namespace Init
         [SerializeField] private CharacterSpawnSlotsView _characterSpawnSlotsView;
 
         [SerializeField] private AttackAbilityConfig attackAbilityConfig;
-
-        private IActionProcessor _actionProcessor;
-        private IActionSubmitter _actionSubmitter;
-        private IAiActionSubmitter _aiActionSubmitter;
         private BattleCharactersModel _battleCharactersModel;
+
+        private IBattleService _battleService;
         private List<BattleCharacterController> _characterControllers;
-        private ICharacterQueue _characterQueue;
-        private CharactersContainer _charactersContainer;
-        private GameStateMachine _gameStateMachine;
+
         private HudController _hudController;
 
         private HudModel _hudModel;
@@ -44,29 +35,17 @@ namespace Init
 
         private void Awake()
         {
-            _charactersContainer = new CharactersContainer();
-            _actionProcessor = new ActionProcessor();
-            _actionSubmitter = new ActionSubmitter();
-            _characterQueue = new CharacterQueue();
-
-            _gameStateMachine = new GameStateMachine();
-            _aiActionSubmitter =
-                new AiActionSubmitter(_gameStateMachine, _actionSubmitter, _characterQueue, attackAbilityConfig);
-            _visualizerService = new VisualizerService();
+            _battleService = new BattleService(attackAbilityConfig);
+            _visualizerService = new VisualizerService(_battleService.ActionProcessor);
         }
 
         private void Start()
         {
-            _gameStateMachine.Init(new List<ITurnStep>
-            {
-                new SelectTeamTurnStep(_characterQueue),
-                new AwaitingInputTurnStep(_actionSubmitter),
-                new ProcessActionsTurnStep(_actionProcessor),
-                new VisualizeActionsTurnStep(_visualizerService),
-                new CheckTurnOverTurnStep(_charactersContainer)
-            });
+            _battleService.Init();
 
-            _charactersContainer.Init(new List<CharacterInfo>
+            _uiService.Init();
+
+            _battleService.StartBattle(new List<CharacterInfo>
             {
                 new(new CharacterData(0, "Player", ECharacterTeam.Player), new CharacterStats(10, 10),
                     new CharacterAbilities(
@@ -82,24 +61,15 @@ namespace Init
                         }))
             });
 
-            _characterQueue.Init(_charactersContainer.Characters.Select(character => character.Value.CharacterData.Id));
-
-            _actionProcessor.Init(new List<IActionLogic>
-            {
-                new DamageActionLogic(_charactersContainer, attackAbilityConfig)
-            });
-            _aiActionSubmitter.Init();
-
-            _uiService.Init();
-
-            _battleCharactersModel = new BattleCharactersModel(_charactersContainer.Characters);
+            _battleCharactersModel = new BattleCharactersModel(_battleService.CharactersContainer.Characters);
 
             _visualizerService.Init(new List<IVisualizerLogic>
             {
                 new AttackVisualizerLogic(_battleCharactersModel, attackAbilityConfig)
             });
+
             _hudModel = new HudModel(_battleCharactersModel.CharacterModels[0],
-                _actionSubmitter);
+                _battleService.ActionSubmitter);
 
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
@@ -122,20 +92,16 @@ namespace Init
                 _characterControllers.Add(controller);
                 controller.Init();
             }
-
-            _gameStateMachine.GoToNextState();
         }
 
         private void OnDestroy()
         {
             foreach (var characterController in _characterControllers) characterController.Terminate();
+            _visualizerService.Terminate();
             _hudController.Terminate();
             _uiService.Terminate();
-            _aiActionSubmitter.Terminate();
-            _characterQueue.Terminate();
-            _actionProcessor.Terminate();
-            _charactersContainer.Terminate();
-            _gameStateMachine.Terminate();
+
+            _battleService.Terminate();
         }
     }
 }

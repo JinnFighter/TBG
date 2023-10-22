@@ -1,4 +1,5 @@
 ﻿using Logic.Actions;
+using Logic.BattleService;
 using Logic.CharacterQueue;
 using Logic.Characters;
 using Logic.Config;
@@ -11,12 +12,12 @@ namespace Logic.AI
         private readonly IActionSubmitter _actionSubmitter;
         private readonly AttackAbilityConfig _attackAbilityConfig;
         private readonly ICharacterQueue _characterQueue;
-        private readonly GameStateMachine _gameStateMachine;
+        private readonly IBattleService _battleService;
 
-        public AiActionSubmitter(GameStateMachine gameStateMachine, IActionSubmitter actionSubmitter,
+        public AiActionSubmitter(IBattleService battleService, IActionSubmitter actionSubmitter,
             ICharacterQueue characterQueue, AttackAbilityConfig attackAbilityConfig)
         {
-            _gameStateMachine = gameStateMachine;
+            _battleService = battleService;
             _actionSubmitter = actionSubmitter;
             _characterQueue = characterQueue;
             _attackAbilityConfig = attackAbilityConfig;
@@ -24,12 +25,12 @@ namespace Logic.AI
 
         public void Init()
         {
-            _gameStateMachine.OnStateEnter.AddListener(HandleStateChanged);
+            _battleService.OnTurnStepEnter.AddListener(HandleStateChanged);
         }
 
         public void Terminate()
         {
-            _gameStateMachine.OnStateEnter.RemoveListener(HandleStateChanged);
+            _battleService.OnTurnStepEnter.RemoveListener(HandleStateChanged);
         }
 
         private void HandleStateChanged(ETurnStep step)
