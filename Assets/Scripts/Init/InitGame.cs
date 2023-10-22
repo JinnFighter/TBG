@@ -12,6 +12,7 @@ using Visuals.BattleField;
 using Visuals.Characters;
 using Visuals.Ui.Hud;
 using Visuals.UiService;
+using Visuals.VisualizerLogic;
 using CharacterInfo = Logic.Characters.CharacterInfo;
 
 namespace Init
@@ -25,6 +26,7 @@ namespace Init
         private IActionProcessor _actionProcessor;
         private IActionSubmitter _actionSubmitter;
         private IAiActionSubmitter _aiActionSubmitter;
+        private BattleCharactersModel _battleCharactersModel;
         private List<BattleCharacterController> _characterControllers;
         private ICharacterQueue _characterQueue;
         private CharactersContainer _charactersContainer;
@@ -44,7 +46,6 @@ namespace Init
 
             _gameStateMachine = new GameStateMachine();
             _aiActionSubmitter = new AiActionSubmitter(_gameStateMachine, _actionSubmitter, _characterQueue);
-
             _visualizerService = new VisualizerService();
         }
 
@@ -70,13 +71,18 @@ namespace Init
             _actionProcessor.Init();
             _aiActionSubmitter.Init();
 
-            _visualizerService.Init();
             _uiService.Init();
 
+            _battleCharactersModel = new BattleCharactersModel(_charactersContainer.Characters);
+
+            _visualizerService.Init(new List<IVisualizerLogic>
+            {
+                new AttackVisualizerLogic(_battleCharactersModel)
+            });
             _hudModel = new HudModel(new PlayerActionsHudModel(new List<IPlayerActionHudModel>
             {
                 new PlayerActionHudModel("attack", 0, 1, _actionSubmitter)
-            }), new CharacterStatsModel(_charactersContainer.Characters[0].Name, _charactersContainer.Characters[0].CharacterStats.Health, _charactersContainer.Characters[0].CharacterStats.MaxHealth));
+            }), _battleCharactersModel.CharacterModels[0].CharacterStatsModel);
 
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
@@ -85,15 +91,15 @@ namespace Init
             _characterViewContainer.Init();
 
             _characterControllers = new List<BattleCharacterController>();
-            foreach (var character in _charactersContainer.Characters)
+            foreach (var character in _battleCharactersModel.CharacterModels)
             {
-                CharacterView characterView = character.Value.TeamId == ECharacterTeam.Player
+                CharacterView characterView = character.Value.Team.Value == ECharacterTeam.Player
                     ? _characterViewContainer.GetView<PlayerCharacterView>()
                     : _characterViewContainer.GetView<EnemyCharacterView>();
 
-                var controller = new BattleCharacterController(new CharacterModel(),
+                var controller = new BattleCharacterController(_battleCharactersModel.CharacterModels[character.Key],
                     Instantiate(characterView,
-                        character.Value.TeamId == ECharacterTeam.Player
+                        character.Value.Team.Value == ECharacterTeam.Player
                             ? _characterSpawnSlotsView.PlayerTeamSpawnSlots[0].transform
                             : _characterSpawnSlotsView.EnemyTeamSpawnSlots[0].transform));
                 _characterControllers.Add(controller);

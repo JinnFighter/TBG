@@ -10,5 +10,10 @@ namespace Logic.Actions
         {
             _actionResults.Add(actionResult);
         }
+
+        public List<IActionResult> GetActionResults()
+        {
+            return _actionResults;
+        }
     }
 }
