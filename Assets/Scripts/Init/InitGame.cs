@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Logic;
 using Logic.Actions;
+using Logic.AI;
 using Logic.CharacterQueue;
 using Logic.Characters;
 using Logic.TurnSteps;
@@ -15,19 +16,19 @@ namespace Init
 {
     public class InitGame : MonoBehaviour
     {
+        [SerializeField] private UiService _uiService;
         private IActionProcessor _actionProcessor;
         private IActionSubmitter _actionSubmitter;
+        private IAiActionSubmitter _aiActionSubmitter;
         private ICharacterQueue _characterQueue;
         private CharactersContainer _charactersContainer;
         private GameStateMachine _gameStateMachine;
+        private HudController _hudController;
+
+        private HudModel _hudModel;
 
         private ETurnStep _turnStep = ETurnStep.Invalid;
         private IVisualizerService _visualizerService;
-
-        [SerializeField] private UiService _uiService;
-
-        private HudModel _hudModel;
-        private HudController _hudController;
 
         private void Awake()
         {
@@ -36,6 +37,8 @@ namespace Init
             _characterQueue = new CharacterQueue();
             _charactersContainer = new CharactersContainer();
             _gameStateMachine = new GameStateMachine();
+            _aiActionSubmitter = new AiActionSubmitter(_gameStateMachine, _actionSubmitter, _characterQueue);
+
             _visualizerService = new VisualizerService();
         }
 
@@ -57,8 +60,9 @@ namespace Init
             });
 
             _actionProcessor.Init();
-            
+
             _characterQueue.Init(_charactersContainer.Characters.Select(character => character.Value.Id));
+            _aiActionSubmitter.Init();
 
             _visualizerService.Init();
             _uiService.Init();
@@ -67,7 +71,7 @@ namespace Init
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel, "hudView"));
             _hudController.Init();
-            
+
             _gameStateMachine.OnStateEnter.AddListener(HandleStepEnter);
             _gameStateMachine.GoToNextState();
         }
@@ -89,6 +93,7 @@ namespace Init
             _hudController.Terminate();
             _uiService.Terminate();
             _gameStateMachine.OnStateEnter.RemoveListener(HandleStepEnter);
+            _aiActionSubmitter.Terminate();
             _characterQueue.Terminate();
             _actionProcessor.Terminate();
             _charactersContainer.Terminate();
@@ -98,14 +103,6 @@ namespace Init
         private void HandleStepEnter(ETurnStep step)
         {
             _turnStep = step;
-            if (step != ETurnStep.AwaitingInput) return;
-
-            if (_characterQueue.CurrentTeamId == CharacterConst.EnemyTeamId)
-                _actionSubmitter.SubmitAction(new ActionInfo
-                {
-                    ActionId = "test",
-                    CasterId = 1
-                });
         }
     }
 }
