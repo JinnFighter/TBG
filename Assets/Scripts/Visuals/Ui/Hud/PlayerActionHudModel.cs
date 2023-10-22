@@ -7,12 +7,14 @@ namespace Visuals.Ui.Hud
     {
         private readonly IActionSubmitter _actionSubmitter;
         private readonly int _id;
+        private readonly int _targetId;
 
-        public PlayerActionHudModel(string actionName, int id, IActionSubmitter actionSubmitter)
+        public PlayerActionHudModel(string actionName, int id, int targetId, IActionSubmitter actionSubmitter)
         {
             ActionName = new ReactiveProperty<string>(actionName);
             _actionSubmitter = actionSubmitter;
             _id = id;
+            _targetId = targetId;
         }
 
         public IReactiveProperty<string> ActionName { get; }
@@ -22,7 +24,8 @@ namespace Visuals.Ui.Hud
             _actionSubmitter.SubmitAction(new ActionInfo
             {
                 ActionId = ActionName.Value,
-                CasterId = _id
+                CasterId = _id,
+                TargetId = _targetId
             });
         }
     }

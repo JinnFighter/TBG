@@ -37,10 +37,11 @@ namespace Init
 
         private void Awake()
         {
-            _actionProcessor = new ActionProcessor();
+            _charactersContainer = new CharactersContainer();
+            _actionProcessor = new ActionProcessor(_charactersContainer);
             _actionSubmitter = new ActionSubmitter();
             _characterQueue = new CharacterQueue();
-            _charactersContainer = new CharactersContainer();
+
             _gameStateMachine = new GameStateMachine();
             _aiActionSubmitter = new AiActionSubmitter(_gameStateMachine, _actionSubmitter, _characterQueue);
 
@@ -64,9 +65,9 @@ namespace Init
                 new(1, "Enemy", ECharacterTeam.Enemy, new CharacterStats(10, 10))
             });
 
-            _actionProcessor.Init();
-
             _characterQueue.Init(_charactersContainer.Characters.Select(character => character.Value.Id));
+
+            _actionProcessor.Init();
             _aiActionSubmitter.Init();
 
             _visualizerService.Init();
@@ -74,7 +75,7 @@ namespace Init
 
             _hudModel = new HudModel(new PlayerActionsHudModel(new List<IPlayerActionHudModel>
             {
-                new PlayerActionHudModel("test", 0, _actionSubmitter)
+                new PlayerActionHudModel("attack", 0, 1, _actionSubmitter)
             }));
 
             _hudController =

@@ -1,4 +1,4 @@
-﻿namespace Logic.Actions
+﻿namespace Logic.Actions.ActionLogic
 {
     public interface IActionLogic
     {

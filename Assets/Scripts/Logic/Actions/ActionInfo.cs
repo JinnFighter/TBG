@@ -4,5 +4,6 @@ namespace Logic.Actions
     {
         public string ActionId;
         public int CasterId;
+        public int TargetId;
     }
 }
