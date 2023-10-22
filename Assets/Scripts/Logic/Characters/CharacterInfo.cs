@@ -2,19 +2,18 @@ namespace Logic.Characters
 {
     public class CharacterInfo
     {
+        public readonly CharacterAbilities CharacterAbilities;
+        public readonly CharacterData CharacterData;
         public readonly CharacterStats CharacterStats;
-        public readonly int Id;
-        public readonly string Name;
-        public readonly ECharacterTeam TeamId;
 
-        public CharacterInfo(int id, string name, ECharacterTeam teamId, CharacterStats characterStats)
+        public CharacterInfo(CharacterData characterData, CharacterStats characterStats,
+            CharacterAbilities characterAbilities)
         {
-            Id = id;
-            Name = name;
-            TeamId = teamId;
+            CharacterData = characterData;
             CharacterStats = characterStats;
+            CharacterAbilities = characterAbilities;
         }
 
-        public bool IsBot => TeamId == ECharacterTeam.Player;
+        public bool IsBot => CharacterData.TeamId == ECharacterTeam.Player;
     }
 }

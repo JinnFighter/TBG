@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Logic.Characters;
 using Visuals.Ui.Hud;
 
@@ -10,13 +11,11 @@ namespace Visuals.Characters
         {
             CharacterModels = new Dictionary<int, CharacterModel>();
 
-            foreach (var k in characterInfos.Keys)
-            {
-                var characterInfo = characterInfos[k];
-                CharacterModels.Add(characterInfo.Id, new CharacterModel(characterInfo.TeamId, new CharacterStatsModel(
-                    characterInfo.Name,
-                    characterInfo.CharacterStats.Health, characterInfo.CharacterStats.MaxHealth)));
-            }
+            foreach (var characterInfo in characterInfos.Keys.Select(k => characterInfos[k]))
+                CharacterModels.Add(characterInfo.CharacterData.Id, new CharacterModel(
+                    new CharacterDataModel(characterInfo.CharacterData),
+                    new CharacterStatsModel(characterInfo),
+                    new CharacterAbilitiesModel(characterInfo.CharacterAbilities)));
         }
 
         public Dictionary<int, CharacterModel> CharacterModels { get; }

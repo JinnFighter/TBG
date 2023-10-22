@@ -1,19 +1,19 @@
-using Logic.Characters;
-using Reactivity;
 using Visuals.Ui.Hud;
 
 namespace Visuals.Characters
 {
     public class CharacterModel : IModel
     {
-        
-        public CharacterModel(ECharacterTeam team, ICharacterStatsModel characterStatsModel)
+        public CharacterModel(ICharacterDataModel characterDataModel, ICharacterStatsModel characterStatsModel,
+            ICharacterAbilitiesModel characterAbilitiesModel)
         {
-            Team = new ReactiveProperty<ECharacterTeam>(team);
+            CharacterDataModel = characterDataModel;
             CharacterStatsModel = characterStatsModel;
+            CharacterAbilitiesModel = characterAbilitiesModel;
         }
 
+        public ICharacterDataModel CharacterDataModel { get; }
         public ICharacterStatsModel CharacterStatsModel { get; }
-        public IReactiveProperty<ECharacterTeam> Team { get; }
+        public ICharacterAbilitiesModel CharacterAbilitiesModel { get; }
     }
 }

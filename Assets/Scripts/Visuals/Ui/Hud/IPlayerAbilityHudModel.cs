@@ -2,7 +2,7 @@
 
 namespace Visuals.Ui.Hud
 {
-    public interface IPlayerActionHudModel : IModel
+    public interface IPlayerAbilityHudModel : IModel
     {
         IReactiveProperty<string> ActionName { get; }
         void SubmitAction();

@@ -11,11 +11,11 @@ namespace Logic.Characters
         {
             foreach (var characterInfo in characterInfos)
             {
-                Characters.Add(characterInfo.Id, characterInfo);
-                if (!CharacterTeams.TryGetValue(characterInfo.TeamId, out _))
-                    CharacterTeams.Add(characterInfo.TeamId, new List<CharacterInfo>());
+                Characters.Add(characterInfo.CharacterData.Id, characterInfo);
+                if (!CharacterTeams.TryGetValue(characterInfo.CharacterData.TeamId, out _))
+                    CharacterTeams.Add(characterInfo.CharacterData.TeamId, new List<CharacterInfo>());
 
-                CharacterTeams[characterInfo.TeamId].Add(characterInfo);
+                CharacterTeams[characterInfo.CharacterData.TeamId].Add(characterInfo);
             }
         }
 
