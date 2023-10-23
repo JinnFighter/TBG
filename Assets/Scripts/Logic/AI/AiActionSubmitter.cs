@@ -1,8 +1,8 @@
-﻿using Logic.Actions;
+﻿using System.Linq;
+using Logic.Actions;
 using Logic.BattleService;
 using Logic.CharacterQueue;
 using Logic.Characters;
-using Logic.Config;
 using Logic.TurnSteps;
 
 namespace Logic.AI
@@ -10,17 +10,17 @@ namespace Logic.AI
     public class AiActionSubmitter : IAiActionSubmitter
     {
         private readonly IActionSubmitter _actionSubmitter;
-        private readonly AttackAbilityConfig _attackAbilityConfig;
-        private readonly ICharacterQueue _characterQueue;
         private readonly IBattleService _battleService;
+        private readonly ICharacterQueue _characterQueue;
+        private readonly CharactersContainer _charactersContainer;
 
         public AiActionSubmitter(IBattleService battleService, IActionSubmitter actionSubmitter,
-            ICharacterQueue characterQueue, AttackAbilityConfig attackAbilityConfig)
+            ICharacterQueue characterQueue, CharactersContainer charactersContainer)
         {
             _battleService = battleService;
             _actionSubmitter = actionSubmitter;
             _characterQueue = characterQueue;
-            _attackAbilityConfig = attackAbilityConfig;
+            _charactersContainer = charactersContainer;
         }
 
         public void Init()
@@ -37,10 +37,12 @@ namespace Logic.AI
         {
             if (step != ETurnStep.AwaitingInput || _characterQueue.CurrentTeamId != ECharacterTeam.Enemy) return;
 
+            var curActiveCharacterId = _characterQueue.CurrentActiveCharacter;
+            var activeCharacter = _charactersContainer.Characters[curActiveCharacterId];
             _actionSubmitter.SubmitAction(new ActionInfo
             {
-                ActionId = _attackAbilityConfig.Id,
-                CasterId = _characterQueue.CurrentActiveCharacter,
+                ActionId = activeCharacter.CharacterAbilities.Abilities.First().Id,
+                CasterId = curActiveCharacterId,
                 TargetId = 0
             });
         }

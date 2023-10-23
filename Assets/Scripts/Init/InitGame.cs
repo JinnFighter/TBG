@@ -35,7 +35,7 @@ namespace Init
 
         private void Awake()
         {
-            _battleService = new BattleService(attackAbilityConfig);
+            _battleService = new BattleService();
             _visualizerService = new VisualizerService(_battleService.ActionProcessor);
         }
 
@@ -61,15 +61,15 @@ namespace Init
                         }))
             });
 
-            _battleCharactersModel = new BattleCharactersModel(_battleService.CharactersContainer.Characters);
+            _battleCharactersModel = new BattleCharactersModel(_battleService.CharactersContainer.Characters,
+                _battleService.ActionSubmitter);
 
             _visualizerService.Init(new List<IVisualizerLogic>
             {
                 new AttackVisualizerLogic(_battleCharactersModel, attackAbilityConfig)
             });
 
-            _hudModel = new HudModel(_battleCharactersModel.CharacterModels[0],
-                _battleService.ActionSubmitter);
+            _hudModel = new HudModel(_battleCharactersModel.CharacterModels[0]);
 
             _hudController =
                 new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));

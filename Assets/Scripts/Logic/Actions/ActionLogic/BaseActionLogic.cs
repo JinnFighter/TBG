@@ -2,11 +2,9 @@
 {
     public abstract class BaseActionLogic : IActionLogic
     {
-        protected abstract string ActionId { get; }
-
         public void DoAction(ActionInfo actionInfo, ActionResultContainer resultContainer)
         {
-            if (ActionId == actionInfo.ActionId && CanDoAction(actionInfo)) DoActionInner(actionInfo, resultContainer);
+            if (CanDoAction(actionInfo)) DoActionInner(actionInfo, resultContainer);
         }
 
         protected virtual bool CanDoAction(ActionInfo actionInfo)

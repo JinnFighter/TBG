@@ -5,7 +5,6 @@ using Logic.Actions.ActionLogic;
 using Logic.AI;
 using Logic.CharacterQueue;
 using Logic.Characters;
-using Logic.Config;
 using Logic.TurnSteps;
 using UnityEngine;
 using UnityEngine.Events;
@@ -16,20 +15,17 @@ namespace Logic.BattleService
     public class BattleService : IBattleService
     {
         private readonly IAiActionSubmitter _aiActionSubmitter;
-        private readonly AttackAbilityConfig _attackAbilityConfig;
         private readonly ICharacterQueue _characterQueue;
 
         private readonly GameStateMachine _gameStateMachine = new();
 
-        public BattleService(
-            AttackAbilityConfig attackAbilityConfig)
+        public BattleService()
         {
             CharactersContainer = new CharactersContainer();
             _characterQueue = new CharacterQueue.CharacterQueue();
             ActionProcessor = new ActionProcessor();
             ActionSubmitter = new ActionSubmitter();
-            _aiActionSubmitter = new AiActionSubmitter(this, ActionSubmitter, _characterQueue, attackAbilityConfig);
-            _attackAbilityConfig = attackAbilityConfig;
+            _aiActionSubmitter = new AiActionSubmitter(this, ActionSubmitter, _characterQueue, CharactersContainer);
         }
 
         public IActionSubmitter ActionSubmitter { get; }
@@ -50,7 +46,7 @@ namespace Logic.BattleService
             _gameStateMachine.OnStateEnter.RemoveListener(OnTurnStepEnter.Invoke);
 
             _aiActionSubmitter.Terminate();
-            _characterQueue.Terminate(); 
+            _characterQueue.Terminate();
             ActionProcessor.Terminate();
             CharactersContainer.Terminate();
             _gameStateMachine.Terminate();
@@ -68,7 +64,7 @@ namespace Logic.BattleService
             {
                 new SelectTeamTurnStep(_characterQueue),
                 new AwaitingInputTurnStep(ActionSubmitter),
-                new ProcessActionsTurnStep(ActionProcessor),
+                new ProcessActionsTurnStep(ActionProcessor)
             });
 
             _gameStateMachine.OnTurnEnd.AddListener(HandleTurnEnded);
@@ -76,7 +72,7 @@ namespace Logic.BattleService
 
             ActionProcessor.Init(new List<IActionLogic>
             {
-                new DamageActionLogic(CharactersContainer, _attackAbilityConfig)
+                new DamageActionLogic(CharactersContainer)
             });
 
             _aiActionSubmitter.Init();
