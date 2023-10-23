@@ -6,5 +6,6 @@ namespace Visuals.Characters
     {
         IReactiveProperty<string> Id { get; }
         IReactiveProperty<string> Name { get; }
+        void SubmitAction(int casterId, int targetId);
     }
 }

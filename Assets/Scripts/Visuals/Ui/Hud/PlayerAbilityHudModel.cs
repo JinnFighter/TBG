@@ -1,4 +1,3 @@
-using Logic.Actions;
 using Reactivity;
 using Visuals.Characters;
 
@@ -6,15 +5,13 @@ namespace Visuals.Ui.Hud
 {
     public class PlayerAbilityHudModel : IPlayerAbilityHudModel
     {
-        private readonly IActionSubmitter _actionSubmitter;
         private readonly ICharacterAbilityModel _abilityModel;
         private readonly int _casterId;
         private readonly int _targetId;
 
-        public PlayerAbilityHudModel(ICharacterAbilityModel characterAbilityModel, int casterId, int targetId, IActionSubmitter actionSubmitter)
+        public PlayerAbilityHudModel(ICharacterAbilityModel characterAbilityModel, int casterId, int targetId)
         {
             _abilityModel = characterAbilityModel;
-            _actionSubmitter = actionSubmitter;
             _casterId = casterId;
             _targetId = targetId;
         }
@@ -23,12 +20,7 @@ namespace Visuals.Ui.Hud
 
         public void SubmitAction()
         {
-            _actionSubmitter.SubmitAction(new ActionInfo
-            {
-                ActionId = ActionName.Value,
-                CasterId = _casterId,
-                TargetId = _targetId
-            });
+            _abilityModel.SubmitAction(_casterId, _targetId);
         }
     }
 }

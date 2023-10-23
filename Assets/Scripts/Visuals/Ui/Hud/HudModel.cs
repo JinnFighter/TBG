@@ -1,13 +1,12 @@
-using Logic.Actions;
 using Visuals.Characters;
 
 namespace Visuals.Ui.Hud
 {
     public class HudModel : IModel
     {
-        public HudModel(CharacterModel characterModel, IActionSubmitter actionSubmitter)
+        public HudModel(CharacterModel characterModel)
         {
-            PlayerAbilitiesHudModel = new PlayerAbilitiesHudModel(characterModel, actionSubmitter);
+            PlayerAbilitiesHudModel = new PlayerAbilitiesHudModel(characterModel);
             CharacterStatsModel = characterModel.CharacterStatsModel;
         }
 
