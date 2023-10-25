@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using Logic;
+using Cysharp.Threading.Tasks;
 using Logic.Actions;
 using UnityEngine;
 using UnityEngine.Events;
+using Visuals.VisualizerLogic;
 
 namespace Visuals
 {
@@ -23,7 +24,7 @@ namespace Visuals
             _visualizerLogics.Clear();
         }
 
-        public void VisualizeAction(ActionInfo actionInfo, ActionResultContainer actionResultContainer)
+        public UniTask VisualizeAction(ActionInfo actionInfo, ActionResultContainer actionResultContainer)
         {
             IsVisualizing = true;
             OnVisualizeStarted.Invoke();
@@ -33,6 +34,7 @@ namespace Visuals
 
             IsVisualizing = false;
             OnVisualizeFinished.Invoke();
+            return UniTask.CompletedTask;
         }
     }
 }

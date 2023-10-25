@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using Logic;
 using Logic.Actions;
 using UnityEngine.Events;
+using Visuals.VisualizerLogic;
 
-namespace Logic
+namespace Visuals
 {
     public interface IVisualizerService
     {
@@ -12,6 +15,6 @@ namespace Logic
 
         void Init(List<IVisualizerLogic> logics);
         void Terminate();
-        void VisualizeAction(ActionInfo actionInfo, ActionResultContainer actionResultContainer);
+        UniTask VisualizeAction(ActionInfo actionInfo, ActionResultContainer actionResultContainer);
     }
 }

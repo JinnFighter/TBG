@@ -1,6 +1,6 @@
 using Logic.Actions;
 
-namespace Logic
+namespace Visuals.VisualizerLogic
 {
     public interface IVisualizerLogic
     {

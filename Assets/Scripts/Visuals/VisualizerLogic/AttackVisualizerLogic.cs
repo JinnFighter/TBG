@@ -1,4 +1,3 @@
-using Logic;
 using Logic.Actions;
 using Visuals.Characters;
 
