@@ -1,3 +1,5 @@
+using Logic.Config;
+
 namespace Logic.Characters
 {
     public class CharacterInfo
@@ -6,12 +8,11 @@ namespace Logic.Characters
         public readonly CharacterData CharacterData;
         public readonly CharacterStats CharacterStats;
 
-        public CharacterInfo(CharacterData characterData, CharacterStats characterStats,
-            CharacterAbilities characterAbilities)
+        public CharacterInfo(CharacterConfig characterConfig, ECharacterTeam team)
         {
-            CharacterData = characterData;
-            CharacterStats = characterStats;
-            CharacterAbilities = characterAbilities;
+            CharacterData = new CharacterData((int) characterConfig.Id, characterConfig.Name, team);
+            CharacterStats = new CharacterStats(10, 10);
+            CharacterAbilities = new CharacterAbilities(characterConfig.Abilities);
         }
 
         public bool IsBot => CharacterData.TeamId == ECharacterTeam.Player;

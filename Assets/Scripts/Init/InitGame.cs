@@ -19,7 +19,9 @@ namespace Init
         [SerializeField] private BattleArenaSceneData _battleArenaSceneData;
         [SerializeField] private CharacterViewContainer _characterViewContainer;
 
-        [SerializeField] private AttackAbilityConfig attackAbilityConfig;
+        [SerializeField] private CharacterConfig _playerCharacterConfig;
+        [SerializeField] private CharacterConfig _enemyCharacterConfig;
+
         private BattleEntryPoint _battleEntryPoint;
 
         private IBattleService _battleService;
@@ -36,18 +38,8 @@ namespace Init
         {
             _battleService.Init(new List<CharacterInfo>
             {
-                new(new CharacterData(0, "Player", ECharacterTeam.Player), new CharacterStats(10, 10),
-                    new CharacterAbilities(
-                        new List<BaseAbilityConfig>
-                        {
-                            attackAbilityConfig
-                        })),
-                new(new CharacterData(1, "Enemy", ECharacterTeam.Enemy), new CharacterStats(10, 10),
-                    new CharacterAbilities(
-                        new List<BaseAbilityConfig>
-                        {
-                            attackAbilityConfig
-                        }))
+                new(_playerCharacterConfig, ECharacterTeam.Player),
+                new(_enemyCharacterConfig, ECharacterTeam.Enemy)
             });
 
             _battleService.StartBattle();
