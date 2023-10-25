@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: WidgetContainer
   m_EditorClassIdentifier: 
   _hudView: {fileID: 6665413245863976372, guid: d29610bc5ea2a5c488cd830bf4468101, type: 3}
+  _gameOverDialogView: {fileID: 5963537827628177206, guid: 695a15364ed84cb4687e003823a2fc39, type: 3}

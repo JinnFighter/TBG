@@ -31,7 +31,7 @@ namespace Init
         private void Awake()
         {
             _battleService = new BattleService();
-            _visualizerService = new VisualizerService(_battleService.ActionProcessor);
+            _visualizerService = new VisualizerService();
         }
 
         private void Start()

@@ -2,6 +2,7 @@
 {
     public enum EUiLayer
     {
-        Screen
+        Screen,
+        Dialog,
     }
 }

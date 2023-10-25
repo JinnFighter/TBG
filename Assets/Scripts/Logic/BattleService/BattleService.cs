@@ -14,6 +14,7 @@ namespace Logic.BattleService
 {
     public class BattleService : IBattleService
     {
+        private readonly IActionProcessor _actionProcessor;
         private readonly IAiActionSubmitter _aiActionSubmitter;
         private readonly ICharacterQueue _characterQueue;
 
@@ -23,18 +24,19 @@ namespace Logic.BattleService
         {
             CharactersContainer = new CharactersContainer();
             _characterQueue = new CharacterQueue.CharacterQueue();
-            ActionProcessor = new ActionProcessor();
+            _actionProcessor = new ActionProcessor();
             ActionSubmitter = new ActionSubmitter();
             _aiActionSubmitter = new AiActionSubmitter(this, ActionSubmitter, _characterQueue, CharactersContainer);
         }
 
         public IActionSubmitter ActionSubmitter { get; }
-        public IActionProcessor ActionProcessor { get; }
         public CharactersContainer CharactersContainer { get; }
 
         public bool IsBattleStarted { get; private set; }
         public bool IsBattleFinished { get; private set; }
         public UnityEvent<ETurnStep> OnTurnStepEnter { get; } = new();
+        public UnityEvent OnTurnEnd { get; } = new();
+        public UnityEvent<ActionInfo, ActionResultContainer> OnActionProcessingFinished { get; } = new();
 
         public void Init(List<CharacterInfo> characterInfos)
         {
@@ -45,10 +47,10 @@ namespace Logic.BattleService
             {
                 new SelectTeamTurnStep(_characterQueue),
                 new AwaitingInputTurnStep(ActionSubmitter),
-                new ProcessActionsTurnStep(ActionProcessor)
+                new ProcessActionsTurnStep(_actionProcessor)
             });
 
-            ActionProcessor.Init(new List<IActionLogic>
+            _actionProcessor.Init(new List<IActionLogic>
             {
                 new DamageActionLogic(CharactersContainer)
             });
@@ -58,12 +60,13 @@ namespace Logic.BattleService
 
         public void Terminate()
         {
+            _actionProcessor.OnActionProcessingFinished.RemoveListener(OnActionProcessingFinished.Invoke);
             _gameStateMachine.OnTurnEnd.RemoveListener(HandleTurnEnded);
             _gameStateMachine.OnStateEnter.RemoveListener(OnTurnStepEnter.Invoke);
 
             _aiActionSubmitter.Terminate();
             _characterQueue.Terminate();
-            ActionProcessor.Terminate();
+            _actionProcessor.Terminate();
             CharactersContainer.Terminate();
             _gameStateMachine.Terminate();
 
@@ -75,6 +78,7 @@ namespace Logic.BattleService
         {
             _gameStateMachine.OnTurnEnd.AddListener(HandleTurnEnded);
             _gameStateMachine.OnStateEnter.AddListener(OnTurnStepEnter.Invoke);
+            _actionProcessor.OnActionProcessingFinished.AddListener(OnActionProcessingFinished.Invoke);
 
             _gameStateMachine.GoToNextState();
 
@@ -101,6 +105,8 @@ namespace Logic.BattleService
             {
                 _gameStateMachine.GoToNextState();
             }
+
+            OnTurnEnd.Invoke();
         }
     }
 }
