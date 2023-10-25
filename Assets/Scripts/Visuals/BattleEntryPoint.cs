@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Logic;
 using Logic.Actions;
 using Logic.BattleService;
 using Logic.Characters;
@@ -69,7 +68,6 @@ namespace Visuals
 
             _battleService.OnActionProcessingFinished.AddListener(HandleProcessingFinished);
             _battleService.OnTurnEnd.AddListener(HandleTurnEnded);
-            _visualizerService.OnVisualizeFinished.AddListener(HandleVisualizeFinished);
         }
 
         private void HandleTurnEnded()
@@ -78,18 +76,12 @@ namespace Visuals
             VisualizeAction();
         }
 
-        private void VisualizeAction()
+        private async void VisualizeAction()
         {
-            var actionResult = _actionResults.Dequeue();
-            _visualizerService.VisualizeAction(actionResult.Item1, actionResult.Item2);
-        }
-
-        private void HandleVisualizeFinished()
-        {
-            if (_actionResults.Count > 0)
+            while (_actionResults.Count > 0)
             {
-                VisualizeAction();
-                return;
+                var actionResult = _actionResults.Dequeue();
+                await _visualizerService.VisualizeAction(actionResult.Item1, actionResult.Item2);
             }
 
             if (!_battleService.IsBattleFinished) return;
@@ -110,7 +102,7 @@ namespace Visuals
         {
             _battleService.OnTurnEnd.RemoveListener(HandleTurnEnded);
             _battleService.OnActionProcessingFinished.RemoveListener(HandleProcessingFinished);
-            _visualizerService.OnVisualizeFinished.RemoveListener(HandleVisualizeFinished);
+
             foreach (var controller in _controllers) controller.Terminate();
             _uiService.CloseScreen<HudModel, HudView>(_hudModel);
 
