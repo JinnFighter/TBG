@@ -36,8 +36,24 @@ namespace Logic.BattleService
         public bool IsBattleFinished { get; private set; }
         public UnityEvent<ETurnStep> OnTurnStepEnter { get; } = new();
 
-        public void Init()
+        public void Init(List<CharacterInfo> characterInfos)
         {
+            CharactersContainer.Init(characterInfos);
+            _characterQueue.Init(CharactersContainer.Characters.Select(character => character.Value.CharacterData.Id));
+
+            _gameStateMachine.Init(new List<ITurnStep>
+            {
+                new SelectTeamTurnStep(_characterQueue),
+                new AwaitingInputTurnStep(ActionSubmitter),
+                new ProcessActionsTurnStep(ActionProcessor)
+            });
+
+            ActionProcessor.Init(new List<IActionLogic>
+            {
+                new DamageActionLogic(CharactersContainer)
+            });
+
+            _aiActionSubmitter.Init();
         }
 
         public void Terminate()
@@ -55,27 +71,10 @@ namespace Logic.BattleService
             IsBattleFinished = false;
         }
 
-        public void StartBattle(List<CharacterInfo> characterInfos)
+        public void StartBattle()
         {
-            CharactersContainer.Init(characterInfos);
-            _characterQueue.Init(CharactersContainer.Characters.Select(character => character.Value.CharacterData.Id));
-
-            _gameStateMachine.Init(new List<ITurnStep>
-            {
-                new SelectTeamTurnStep(_characterQueue),
-                new AwaitingInputTurnStep(ActionSubmitter),
-                new ProcessActionsTurnStep(ActionProcessor)
-            });
-
             _gameStateMachine.OnTurnEnd.AddListener(HandleTurnEnded);
             _gameStateMachine.OnStateEnter.AddListener(OnTurnStepEnter.Invoke);
-
-            ActionProcessor.Init(new List<IActionLogic>
-            {
-                new DamageActionLogic(CharactersContainer)
-            });
-
-            _aiActionSubmitter.Init();
 
             _gameStateMachine.GoToNextState();
 

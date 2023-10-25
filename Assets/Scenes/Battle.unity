@@ -211,6 +211,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dbb9ae99d844af2a33373df60fcfb81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &320187035
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 320187036}
+  - component: {fileID: 320187037}
+  m_Layer: 0
+  m_Name: BattleArenaSceneData
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &320187036
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 320187035}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &320187037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 320187035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7439b73932a60624f84c889b764e1491, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <CharacterSpawnSlotsView>k__BackingField: {fileID: 2007676455}
 --- !u!1 &430908797
 GameObject:
   m_ObjectHideFlags: 0
@@ -832,8 +877,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiService: {fileID: 1716674652}
+  _battleArenaSceneData: {fileID: 320187037}
   _characterViewContainer: {fileID: 11400000, guid: f507f9a74f766e84ea489e41492cb103, type: 2}
-  _characterSpawnSlotsView: {fileID: 2007676455}
   attackAbilityConfig: {fileID: 11400000, guid: d31e2e6f91da19c4aa843d5bdd9c03fe, type: 2}
 --- !u!4 &1382785911
 Transform:
@@ -1019,3 +1064,4 @@ SceneRoots:
   - {fileID: 3443668530695812229}
   - {fileID: 2007676454}
   - {fileID: 678565410}
+  - {fileID: 320187036}

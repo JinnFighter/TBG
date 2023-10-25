@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Visuals.BattleField
+namespace Visuals.BattleArena
 {
     public class CharacterSpawnSlotsView : BaseView
     {
