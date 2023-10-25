@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using Logic;
+using Logic.Actions;
 using Logic.BattleService;
 using Logic.Characters;
 using UnityEngine;
 using Visuals.BattleArena;
 using Visuals.Characters;
+using Visuals.Ui.GameOver;
 using Visuals.Ui.Hud;
 using Visuals.UiService;
 using Visuals.VisualizerLogic;
@@ -13,6 +15,7 @@ namespace Visuals
 {
     public class BattleEntryPoint
     {
+        private readonly Queue<(ActionInfo, ActionResultContainer)> _actionResults = new();
         private readonly BattleArenaSceneData _battleArenaSceneData;
         private readonly IBattleService _battleService;
         private readonly CharacterViewContainer _characterViewContainer;
@@ -20,6 +23,7 @@ namespace Visuals
         private readonly List<IController> _controllers = new();
         private readonly IUiService _uiService;
         private readonly IVisualizerService _visualizerService;
+
         private BattleCharactersModel _battleCharactersModel;
         private HudModel _hudModel;
 
@@ -62,10 +66,51 @@ namespace Visuals
             });
 
             foreach (var controller in _controllers) controller.Init();
+
+            _battleService.OnActionProcessingFinished.AddListener(HandleProcessingFinished);
+            _battleService.OnTurnEnd.AddListener(HandleTurnEnded);
+            _visualizerService.OnVisualizeFinished.AddListener(HandleVisualizeFinished);
+        }
+
+        private void HandleTurnEnded()
+        {
+            if (_visualizerService.IsVisualizing || _actionResults.Count == 0) return;
+            VisualizeAction();
+        }
+
+        private void VisualizeAction()
+        {
+            var actionResult = _actionResults.Dequeue();
+            _visualizerService.VisualizeAction(actionResult.Item1, actionResult.Item2);
+        }
+
+        private void HandleVisualizeFinished()
+        {
+            if (_actionResults.Count > 0)
+            {
+                VisualizeAction();
+                return;
+            }
+
+            if (!_battleService.IsBattleFinished) return;
+
+            var gameOverDialogModel = new GameOverDialogModel();
+            var controller = new GameOverDialogController(gameOverDialogModel,
+                _uiService.OpenDialog<GameOverDialogModel, GameOverDialogView>(gameOverDialogModel));
+            _controllers.Add(controller);
+            controller.Init();
+        }
+
+        private void HandleProcessingFinished(ActionInfo actionInfo, ActionResultContainer resultContainer)
+        {
+            _actionResults.Enqueue((actionInfo, resultContainer));
         }
 
         public void Terminate()
         {
+            _battleService.OnTurnEnd.RemoveListener(HandleTurnEnded);
+            _battleService.OnActionProcessingFinished.RemoveListener(HandleProcessingFinished);
+            _visualizerService.OnVisualizeFinished.RemoveListener(HandleVisualizeFinished);
             foreach (var controller in _controllers) controller.Terminate();
             _uiService.CloseScreen<HudModel, HudView>(_hudModel);
 

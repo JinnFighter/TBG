@@ -8,6 +8,7 @@ namespace Logic
     {
         UnityEvent OnVisualizeStarted { get; }
         UnityEvent OnVisualizeFinished { get; }
+        bool IsVisualizing { get; }
 
         void Init(List<IVisualizerLogic> logics);
         void Terminate();

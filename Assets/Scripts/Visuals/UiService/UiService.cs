@@ -7,12 +7,14 @@ namespace Visuals.UiService
     public class UiService : MonoBehaviour, IUiService
     {
         [SerializeField] private Canvas _layerScreen;
+        [SerializeField] private Canvas _layerDialog;
 
         [SerializeField] private ViewPool _viewPool;
 
         private readonly Dictionary<EUiLayer, LayerWidgetsContainer> _widgets = new()
         {
-            {EUiLayer.Screen, new LayerWidgetsContainer()}
+            {EUiLayer.Screen, new LayerWidgetsContainer()},
+            {EUiLayer.Dialog, new LayerWidgetsContainer()}
         };
 
         public void Init()
@@ -24,6 +26,7 @@ namespace Visuals.UiService
         public void Terminate()
         {
             Debug.Log("Destroy Ui Service");
+            
             foreach (var value in Enum.GetValues(typeof(EUiLayer)))
             {
                 var layer = (EUiLayer) value;
@@ -56,6 +59,28 @@ namespace Visuals.UiService
             where TModel : IModel where TView : BaseView
         {
             CloseWidget(model, EUiLayer.Screen);
+        }
+
+        public TView OpenDialog<TModel, TView>(TModel model, OpenParams openParams = null)
+            where TModel : IModel where TView : BaseView
+        {
+            var container = _widgets[EUiLayer.Dialog];
+            if (!container.Widgets.ContainsKey(model))
+            {
+                var widget = _viewPool.TakeItem<TView>();
+                widget.transform.SetParent(_layerScreen.transform, false);
+                container.Widgets[model] = widget;
+
+                return widget;
+            }
+
+            return null;
+        }
+
+        public void CloseDialog<TModel, TView>(IModel model, OpenParams openParams = null)
+            where TModel : IModel where TView : BaseView
+        {
+            CloseWidget(model, EUiLayer.Dialog);
         }
 
         private void CloseWidget(IModel model, EUiLayer layer)

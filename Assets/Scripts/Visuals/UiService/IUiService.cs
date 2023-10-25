@@ -10,5 +10,11 @@ namespace Visuals.UiService
 
         void CloseScreen<TModel, TView>(IModel model, OpenParams openParams = null)
             where TModel : IModel where TView : BaseView;
+        
+        TView OpenDialog<TModel, TView>(TModel model, OpenParams openParams = null)
+            where TModel : IModel where TView : BaseView;
+
+        void CloseDialog<TModel, TView>(IModel model, OpenParams openParams = null)
+            where TModel : IModel where TView : BaseView;
     }
 }
