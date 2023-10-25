@@ -5,11 +5,9 @@ using Logic.Characters;
 using Logic.Config;
 using UnityEngine;
 using Visuals;
-using Visuals.BattleField;
+using Visuals.BattleArena;
 using Visuals.Characters;
-using Visuals.Ui.Hud;
 using Visuals.UiService;
-using Visuals.VisualizerLogic;
 using CharacterInfo = Logic.Characters.CharacterInfo;
 
 namespace Init
@@ -18,18 +16,13 @@ namespace Init
     {
         [SerializeField] private UiService _uiService;
 
+        [SerializeField] private BattleArenaSceneData _battleArenaSceneData;
         [SerializeField] private CharacterViewContainer _characterViewContainer;
-        [SerializeField] private CharacterSpawnSlotsView _characterSpawnSlotsView;
 
         [SerializeField] private AttackAbilityConfig attackAbilityConfig;
-        private BattleCharactersModel _battleCharactersModel;
+        private BattleEntryPoint _battleEntryPoint;
 
         private IBattleService _battleService;
-        private List<BattleCharacterController> _characterControllers;
-
-        private HudController _hudController;
-
-        private HudModel _hudModel;
 
         private IVisualizerService _visualizerService;
 
@@ -41,11 +34,7 @@ namespace Init
 
         private void Start()
         {
-            _battleService.Init();
-
-            _uiService.Init();
-
-            _battleService.StartBattle(new List<CharacterInfo>
+            _battleService.Init(new List<CharacterInfo>
             {
                 new(new CharacterData(0, "Player", ECharacterTeam.Player), new CharacterStats(10, 10),
                     new CharacterAbilities(
@@ -61,44 +50,20 @@ namespace Init
                         }))
             });
 
-            _battleCharactersModel = new BattleCharactersModel(_battleService.CharactersContainer.Characters,
-                _battleService.ActionSubmitter);
-
-            _visualizerService.Init(new List<IVisualizerLogic>
-            {
-                new AttackVisualizerLogic(_battleCharactersModel, attackAbilityConfig)
-            });
-
-            _hudModel = new HudModel(_battleCharactersModel.CharacterModels[0]);
-
-            _hudController =
-                new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel));
-            _hudController.Init();
+            _battleService.StartBattle();
 
             _characterViewContainer.Init();
 
-            _characterControllers = new List<BattleCharacterController>();
-            foreach (var character in _battleCharactersModel.CharacterModels)
-            {
-                CharacterView characterView = character.Value.CharacterDataModel.TeamId.Value == ECharacterTeam.Player
-                    ? _characterViewContainer.GetView<PlayerCharacterView>()
-                    : _characterViewContainer.GetView<EnemyCharacterView>();
+            _uiService.Init();
 
-                var controller = new BattleCharacterController(_battleCharactersModel.CharacterModels[character.Key],
-                    Instantiate(characterView,
-                        character.Value.CharacterDataModel.TeamId.Value == ECharacterTeam.Player
-                            ? _characterSpawnSlotsView.PlayerTeamSpawnSlots[0].transform
-                            : _characterSpawnSlotsView.EnemyTeamSpawnSlots[0].transform));
-                _characterControllers.Add(controller);
-                controller.Init();
-            }
+            _battleEntryPoint = new BattleEntryPoint(_battleArenaSceneData, _battleService, _visualizerService,
+                _characterViewContainer, _uiService);
+            _battleEntryPoint.Init();
         }
 
         private void OnDestroy()
         {
-            foreach (var characterController in _characterControllers) characterController.Terminate();
-            _visualizerService.Terminate();
-            _hudController.Terminate();
+            _battleEntryPoint.Terminate();
             _uiService.Terminate();
 
             _battleService.Terminate();

@@ -13,9 +13,9 @@ namespace Logic.BattleService
 
         UnityEvent<ETurnStep> OnTurnStepEnter { get; }
 
-        void Init();
+        void Init(List<CharacterInfo> characterInfos);
         void Terminate();
-        void StartBattle(List<CharacterInfo> characterInfos);
+        void StartBattle();
         IActionSubmitter ActionSubmitter { get; }
         IActionProcessor ActionProcessor { get; }
         CharactersContainer CharactersContainer { get; }
