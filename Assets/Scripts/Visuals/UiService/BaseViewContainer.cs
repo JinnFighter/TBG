@@ -14,5 +14,10 @@ namespace Visuals.UiService
         {
             return Views[typeof(T)] as T;
         }
+
+        public BaseView GetView(Type type)
+        {
+            return Views[type];
+        }
     }
 }

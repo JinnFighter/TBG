@@ -43,6 +43,24 @@ namespace Visuals.UiService
             return result;
         }
 
+        public BaseView TakeItem(Type type)
+        {
+            BaseView result;
+            if (_pooledObjects.ContainsKey(type) && _pooledObjects[type].Count > 0)
+            {
+                result = _pooledObjects[type].Dequeue();
+                result.transform.SetParent(null);
+                result.enabled = true;
+            }
+
+            else
+            {
+                result = Instantiate(_viewContainer.GetView(type));
+            }
+
+            return result;
+        }
+
         public void Release<T>(T item) where T : BaseView
         {
             var type = typeof(T);

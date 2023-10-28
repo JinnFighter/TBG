@@ -1,3 +1,6 @@
+using System;
+using UnityEngine;
+
 namespace Visuals.UiService
 {
     public interface IUiService
@@ -5,16 +8,11 @@ namespace Visuals.UiService
         void Init();
         void Terminate();
 
-        TView OpenScreen<TModel, TView>(TModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView;
+        WidgetReference Open<TWidget>(IModel model, Type viewType) where TWidget : IUiWidget;
 
-        void CloseScreen<TModel, TView>(IModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView;
-        
-        TView OpenDialog<TModel, TView>(TModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView;
+        WidgetReference OpenEmbedded<TWidget>(IModel model, UiView view, Transform parent)
+            where TWidget : IUiEmbeddedWidget;
 
-        void CloseDialog<TModel, TView>(IModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView;
+        void Close<TWidget>(IModel model) where TWidget : IUiWidget;
     }
 }

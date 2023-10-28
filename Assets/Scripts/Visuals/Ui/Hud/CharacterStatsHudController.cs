@@ -1,13 +1,10 @@
 ﻿using Reactivity;
+using Visuals.UiService;
 
 namespace Visuals.Ui.Hud
 {
-    public class CharacterStatsHudController : BaseController<ICharacterStatsModel, CharacterStatsHudView>
+    public class CharacterStatsHudController : UiEmbeddedWidget<ICharacterStatsModel, CharacterStatsHudView>
     {
-        public CharacterStatsHudController(ICharacterStatsModel model, CharacterStatsHudView view) : base(model, view)
-        {
-        }
-
         protected override void InitInner()
         {
             SubscriptionAggregator.ListenEvent(Model.CharacterName, HandleCharacterNameChanged, true);

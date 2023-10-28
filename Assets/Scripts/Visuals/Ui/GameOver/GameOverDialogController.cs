@@ -1,14 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using Visuals.UiService;
 
 namespace Visuals.Ui.GameOver
 {
-    public class GameOverDialogController : BaseController<GameOverDialogModel, GameOverDialogView>
+    public class GameOverDialogController : UiDialog<GameOverDialogModel, GameOverDialogView>
     {
-        public GameOverDialogController(GameOverDialogModel model, GameOverDialogView view) : base(model, view)
-        {
-        }
-
         protected override void InitInner()
         {
             SubscriptionAggregator.ListenEvent(View.ButtonRestart.onClick, HandleButtonRestartClicked);

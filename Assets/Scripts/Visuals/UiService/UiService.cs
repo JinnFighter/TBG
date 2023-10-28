@@ -10,12 +10,7 @@ namespace Visuals.UiService
         [SerializeField] private Canvas _layerDialog;
 
         [SerializeField] private ViewPool _viewPool;
-
-        private readonly Dictionary<EUiLayer, LayerWidgetsContainer> _widgets = new()
-        {
-            {EUiLayer.Screen, new LayerWidgetsContainer()},
-            {EUiLayer.Dialog, new LayerWidgetsContainer()}
-        };
+        private readonly Dictionary<IModel, WidgetReference> _widgets = new();
 
         public void Init()
         {
@@ -26,76 +21,69 @@ namespace Visuals.UiService
         public void Terminate()
         {
             Debug.Log("Destroy Ui Service");
-            
-            foreach (var value in Enum.GetValues(typeof(EUiLayer)))
+
+            foreach (var kvp in _widgets)
             {
-                var layer = (EUiLayer) value;
-                var keys = new List<IModel>(_widgets[layer].Widgets.Keys);
-                foreach (var key in keys) CloseWidget(key, layer);
+                kvp.Value.Close();
             }
 
             _widgets.Clear();
-
             _viewPool.Terminate();
         }
 
-        public TView OpenScreen<TModel, TView>(TModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView
+        public WidgetReference Open<TWidget>(IModel model, Type viewType) where TWidget : IUiWidget
         {
-            var container = _widgets[EUiLayer.Screen];
-            if (!container.Widgets.ContainsKey(model))
+            if (!_widgets.ContainsKey(model))
             {
-                var widget = _viewPool.TakeItem<TView>();
-                widget.transform.SetParent(_layerScreen.transform, false);
-                container.Widgets[model] = widget;
+                var widget = Activator.CreateInstance<TWidget>();
+                var layer = widget switch
+                {
+                    IUiScreen => _layerScreen.transform,
+                    IUiDialog => _layerDialog.transform,
+                    _ => throw new Exception("Tried to Create embedded widget as not embedded")
+                };
+                var view = _viewPool.TakeItem(viewType) as UiView;
+                view.transform.SetParent(layer, false);
+                widget.Setup(model, view, this);
 
-                return widget;
+                var widgetReference = new WidgetReference(_viewPool, widget, view);
+                _widgets[model] = widgetReference;
+
+                widgetReference.Open();
+
+                return widgetReference;
             }
 
             return null;
         }
 
-        public void CloseScreen<TModel, TView>(IModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView
+        public WidgetReference OpenEmbedded<TWidget>(IModel model, UiView view, Transform parent)
+            where TWidget : IUiEmbeddedWidget
         {
-            CloseWidget(model, EUiLayer.Screen);
-        }
-
-        public TView OpenDialog<TModel, TView>(TModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView
-        {
-            var container = _widgets[EUiLayer.Dialog];
-            if (!container.Widgets.ContainsKey(model))
+            if (!_widgets.ContainsKey(model))
             {
-                var widget = _viewPool.TakeItem<TView>();
-                widget.transform.SetParent(_layerScreen.transform, false);
-                container.Widgets[model] = widget;
+                var widget = Activator.CreateInstance<TWidget>();
+                widget.Setup(model, view, this);
 
-                return widget;
+                view.transform.SetParent(parent, false);
+                var widgetReference = new WidgetReference(_viewPool, widget, view);
+                _widgets[model] = widgetReference;
+
+                widgetReference.Open();
+
+                return widgetReference;
             }
 
             return null;
         }
 
-        public void CloseDialog<TModel, TView>(IModel model, OpenParams openParams = null)
-            where TModel : IModel where TView : BaseView
+        public void Close<TWidget>(IModel model) where TWidget : IUiWidget
         {
-            CloseWidget(model, EUiLayer.Dialog);
-        }
-
-        private void CloseWidget(IModel model, EUiLayer layer)
-        {
-            var container = _widgets[layer];
-            if (_widgets[layer].Widgets.TryGetValue(model, out var widget))
+            if (_widgets.TryGetValue(model, out var widgetReference))
             {
-                _viewPool.Release(widget);
-                container.Widgets.Remove(model);
+                widgetReference.Close();
+                _widgets.Remove(model);
             }
         }
-    }
-
-    internal class LayerWidgetsContainer
-    {
-        public Dictionary<IModel, BaseView> Widgets { get; } = new();
     }
 }
