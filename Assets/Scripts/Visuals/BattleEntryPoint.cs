@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Logic.Actions;
 using Logic.BattleService;
 using Logic.Characters;
@@ -7,6 +8,7 @@ using Visuals.BattleArena;
 using Visuals.Characters;
 using Visuals.Ui.GameOver;
 using Visuals.Ui.Hud;
+using Visuals.Ui.TargetSelection;
 using Visuals.UiService;
 using Visuals.VisualizerLogic;
 
@@ -24,7 +26,11 @@ namespace Visuals
         private readonly IVisualizerService _visualizerService;
 
         private BattleCharactersModel _battleCharactersModel;
+        private CharacterSpawnSlotsModel _enemySpawnSlots;
+        private ITargetSelectorModel _enemyTargetSelectorModel;
         private HudModel _hudModel;
+        private CharacterSpawnSlotsModel _playerSpawnSlots;
+        private ITargetSelectorModel _playerTargetSelectorModel;
 
         public BattleEntryPoint(BattleArenaSceneData battleArenaSceneData, IBattleService battleService,
             IVisualizerService visualizerService, CharacterViewContainer characterViewContainer, IUiService uiService)
@@ -41,19 +47,32 @@ namespace Visuals
             _battleCharactersModel = new BattleCharactersModel(_battleService.CharactersContainer.Characters,
                 _battleService.ActionSubmitter);
 
-            foreach (var character in _battleCharactersModel.CharacterModels)
+            _playerSpawnSlots =
+                new CharacterSpawnSlotsModel(_battleCharactersModel.TeamCharacterModels[ECharacterTeam.Player].Count);
+            _enemySpawnSlots =
+                new CharacterSpawnSlotsModel(_battleCharactersModel.TeamCharacterModels[ECharacterTeam.Enemy].Count);
+
+            var characters = _battleCharactersModel.CharacterModels.ToList();
+            for (var i = 0; i < characters.Count; i++)
             {
+                var character = characters[i];
                 CharacterView characterView = character.Value.CharacterDataModel.TeamId.Value == ECharacterTeam.Player
                     ? _characterViewContainer.GetView<PlayerCharacterView>()
                     : _characterViewContainer.GetView<EnemyCharacterView>();
 
+                var slotId = character.Value.CharacterDataModel.TeamId.Value == ECharacterTeam.Player
+                    ? _playerSpawnSlots.SpawnAtSlot(character.Value.CharacterDataModel.Id.Value)
+                    : _enemySpawnSlots.SpawnAtSlot(character.Value.CharacterDataModel.Id.Value);
                 var controller = new BattleCharacterController(_battleCharactersModel.CharacterModels[character.Key],
                     Object.Instantiate(characterView,
                         character.Value.CharacterDataModel.TeamId.Value == ECharacterTeam.Player
-                            ? _battleArenaSceneData.CharacterSpawnSlotsView.PlayerTeamSpawnSlots[0].transform
-                            : _battleArenaSceneData.CharacterSpawnSlotsView.EnemyTeamSpawnSlots[0].transform));
+                            ? _battleArenaSceneData.CharacterSpawnSlotsView.PlayerTeamSpawnSlots[slotId].transform
+                            : _battleArenaSceneData.CharacterSpawnSlotsView.EnemyTeamSpawnSlots[slotId].transform));
                 _controllers.Add(controller);
             }
+
+            _playerTargetSelectorModel = new TargetSelectorModel(_playerSpawnSlots, ECharacterTeam.Player);
+            _enemyTargetSelectorModel = new TargetSelectorModel(_enemySpawnSlots, ECharacterTeam.Player);
 
             _hudModel = new HudModel(_battleCharactersModel.CharacterModels[0]);
 
