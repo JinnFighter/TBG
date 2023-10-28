@@ -1,13 +1,10 @@
 ﻿using Reactivity;
+using Visuals.UiService;
 
 namespace Visuals.Ui.Hud
 {
-    public class PlayerActionHudController : BaseController<IPlayerAbilityHudModel, PlayerActionHudView>
+    public class PlayerActionHudController : UiEmbeddedWidget<IPlayerAbilityHudModel, PlayerActionHudView>
     {
-        public PlayerActionHudController(IPlayerAbilityHudModel model, PlayerActionHudView view) : base(model, view)
-        {
-        }
-
         protected override void InitInner()
         {
             SubscriptionAggregator.ListenEvent(Model.ActionName, HandleActionNameChanged, true);

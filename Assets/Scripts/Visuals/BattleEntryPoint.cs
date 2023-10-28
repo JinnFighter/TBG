@@ -57,7 +57,7 @@ namespace Visuals
 
             _hudModel = new HudModel(_battleCharactersModel.CharacterModels[0]);
 
-            _controllers.Add(new HudController(_hudModel, _uiService.OpenScreen<HudModel, HudView>(_hudModel)));
+            _uiService.Open<HudWidget>(_hudModel, typeof(HudView));
 
             _visualizerService.Init(new List<IVisualizerLogic>
             {
@@ -86,11 +86,7 @@ namespace Visuals
 
             if (!_battleService.IsBattleFinished) return;
 
-            var gameOverDialogModel = new GameOverDialogModel();
-            var controller = new GameOverDialogController(gameOverDialogModel,
-                _uiService.OpenDialog<GameOverDialogModel, GameOverDialogView>(gameOverDialogModel));
-            _controllers.Add(controller);
-            controller.Init();
+            _uiService.Open<GameOverDialogController>(new GameOverDialogModel(), typeof(GameOverDialogView));
         }
 
         private void HandleProcessingFinished(ActionInfo actionInfo, ActionResultContainer resultContainer)
@@ -104,7 +100,7 @@ namespace Visuals
             _battleService.OnActionProcessingFinished.RemoveListener(HandleProcessingFinished);
 
             foreach (var controller in _controllers) controller.Terminate();
-            _uiService.CloseScreen<HudModel, HudView>(_hudModel);
+            _uiService.Close<HudWidget>(_hudModel);
 
             _controllers.Clear();
 
